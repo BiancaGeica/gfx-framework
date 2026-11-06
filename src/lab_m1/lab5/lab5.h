@@ -36,6 +36,10 @@ namespace m1
         bool renderCameraTarget;
 
         // TODO(student): If you need any other class variables, define them here.
+        bool isPerspective; // perspectiva sau ortografica
+        float fov; // field of view
+        float zNear, zFar; // dist. cea mai apropiata/ cea mai departata
+        float orthoLeft, orthoRight, orthoBottom, orthoTop; // marginile ferestrei
 
     };
 }   // namespace m1

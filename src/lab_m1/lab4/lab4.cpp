@@ -65,19 +65,19 @@ void Lab4::RenderScene() {
     modelMatrix = glm::mat4(1);
     modelMatrix *= transform3D::Translate(-2.5f, 0.5f, -1.5f);
     modelMatrix *= transform3D::Translate(translateX, translateY, translateZ);
-    RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+    RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix); // cubul 1
 
     modelMatrix = glm::mat4(1);
     modelMatrix *= transform3D::Translate(0.0f, 0.5f, -1.5f);
     modelMatrix *= transform3D::Scale(scaleX, scaleY, scaleZ);
-    RenderMesh(meshes["box"], shaders["Simple"], modelMatrix);
+    RenderMesh(meshes["box"], shaders["Simple"], modelMatrix); // cubul 2
 
     modelMatrix = glm::mat4(1);
     modelMatrix *= transform3D::Translate(2.5f, 0.5f, -1.5f);
     modelMatrix *= transform3D::RotateOX(angularStepOX);
     modelMatrix *= transform3D::RotateOY(angularStepOY);
     modelMatrix *= transform3D::RotateOZ(angularStepOZ);
-    RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+    RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix); // cubul 3
 }
 
 void Lab4::Update(float deltaTimeSeconds)
@@ -97,6 +97,7 @@ void Lab4::Update(float deltaTimeSeconds)
     glViewport(miniViewportArea.x, miniViewportArea.y, miniViewportArea.width, miniViewportArea.height);
 
     // TODO(student): render the scene again, in the new viewport
+    RenderScene();
     DrawCoordinateSystem();
 }
 
@@ -114,6 +115,62 @@ void Lab4::FrameEnd()
 void Lab4::OnInputUpdate(float deltaTime, int mods)
 {
     // TODO(student): Add transformation logic
+    if (!window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT)) {
+        float speed = 2.0f;
+
+        // cubul 1
+        if (window->KeyHold(GLFW_KEY_W)) {
+            translateZ += speed * deltaTime;
+        }
+        if (window->KeyHold(GLFW_KEY_S)) {
+            translateZ -= speed * deltaTime;
+        }
+        if (window->KeyHold(GLFW_KEY_A)) {
+            translateX += speed * deltaTime;
+        }
+        if (window->KeyHold(GLFW_KEY_D)) {
+            translateX -= speed * deltaTime;
+        }
+        if (window->KeyHold(GLFW_KEY_R)) {
+            translateY += speed * deltaTime;
+        }
+        if (window->KeyHold(GLFW_KEY_F)) {
+            translateY -= speed * deltaTime;
+        }
+
+        // cubul 2
+        if (window->KeyHold(GLFW_KEY_1)) {
+            scaleX += speed * deltaTime;
+            scaleY += speed * deltaTime;
+            scaleZ += speed * deltaTime;
+        }
+
+        if (window->KeyHold(GLFW_KEY_2)) {
+            scaleX -= speed * deltaTime;
+            scaleY -= speed * deltaTime;
+            scaleZ -= speed * deltaTime;
+        }
+
+        // cubul 3
+        if (window->KeyHold(GLFW_KEY_3)) {
+            angularStepOX += speed * deltaTime;
+        }
+        if (window->KeyHold(GLFW_KEY_4)) {
+            angularStepOX -= speed * deltaTime;
+        }
+        if (window->KeyHold(GLFW_KEY_5)) {
+            angularStepOY += speed * deltaTime;
+        }
+        if (window->KeyHold(GLFW_KEY_6)) {
+            angularStepOY -= speed * deltaTime;
+        }
+        if (window->KeyHold(GLFW_KEY_7)) {
+            angularStepOZ += speed * deltaTime;
+        }
+        if (window->KeyHold(GLFW_KEY_8)) {
+            angularStepOZ -= speed * deltaTime;
+        }
+    }
 
 }
 
@@ -137,7 +194,30 @@ void Lab4::OnKeyPress(int key, int mods)
         }
     }
     
+    int factor = 10;
+    // float factor_s = 1.1f;
+    float factor_s = (float)(miniViewportArea.width / (float)miniViewportArea.height);
     // TODO(student): Add viewport movement and scaling logic
+    if (key == GLFW_KEY_L) {
+        miniViewportArea.x += factor;
+    }
+    if (key == GLFW_KEY_J) {
+        miniViewportArea.x -= factor;
+    }
+    if (key == GLFW_KEY_I) {
+        miniViewportArea.y += factor;
+    }
+    if (key == GLFW_KEY_K) {
+        miniViewportArea.y -= factor;
+    }
+    if (key == GLFW_KEY_U) {
+        miniViewportArea.width += 100;
+        miniViewportArea.height += 100 / factor_s;
+    }
+    if (key == GLFW_KEY_O) {
+        miniViewportArea.width -= 100;
+        miniViewportArea.height -= 100 / factor_s;
+    }
 }
 
 
