@@ -55,13 +55,15 @@ void Lab5::Init()
     zNear = 0.01f;
     zFar = 200.0f;
     isPerspective = true;
-    orthoRight = 0.5f * window->props.aspectRatio;
-    orthoLeft = -0.5f * window->props.aspectRatio;
-    orthoTop = 0.7f;
-    orthoBottom = -0.7;
+    orthoRight = 0.5f * window->props.aspectRatio; // marginea dreapta a ferestrei
+    orthoLeft = -0.5f * window->props.aspectRatio; // marginea stanga a ferestrei
+    orthoTop = 0.7f; // marginea de sus
+    orthoBottom = -0.7; // marginea de jos
 
-    projectionMatrix = glm::perspective(fov, window->props.aspectRatio, zNear, zFar);
-
+    projectionMatrix = glm::perspective(fov, window->props.aspectRatio, zNear, zFar); // perspectiva: cum se vede in viata reala
+                                                                                      // daca te indepartezi de un obiect il vezi mai mic, daca te apropii e mai mare
+                                                                                      // ortografica: toate obiectele au aceeasi marime, e ca si cum as face o poza
+    // projection matrix decide cum ajunge scena 3D in 2D deci este ca un fel de aparat foto care face o poza
 }
 
 
@@ -84,7 +86,7 @@ void Lab5::Update(float deltaTimeSeconds)
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 1, 0));
         modelMatrix = glm::rotate(modelMatrix, RADIANS(45.0f), glm::vec3(0, 1, 0));
 
-        RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+        RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix); // model matrix spune unde este un obiect in scena, cat de mare este si cum este rotit
     }
 
     {
@@ -131,7 +133,7 @@ void Lab5::Update(float deltaTimeSeconds)
         modelMatrix = glm::translate(modelMatrix, camera->GetTargetPosition());
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
         RenderMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix);
-    }
+    } // sfera din mijloc
 }
 
 
@@ -218,8 +220,37 @@ void Lab5::OnInputUpdate(float deltaTime, int mods)
             fov -= fovSpeed * deltaTime;
         }
 
-        fov = glm::clamp(fov, RADIANS(10), RADIANS(150));
+        fov = glm::clamp(fov, RADIANS(10), RADIANS(150)); // clamp este folosit sa nu mearga prea in spate fov-ul sau prea in fata
         projectionMatrix = glm::perspective(fov, window->props.aspectRatio, zNear, zFar);
+    }
+    else
+    {
+        float orthoSpeed = 1.0f;
+
+        // latimea ferestrei de proiectie
+        if (window->KeyHold(GLFW_KEY_L)) {
+            orthoRight += orthoSpeed * deltaTime;
+        }
+
+        if (window->KeyHold(GLFW_KEY_J)) {
+            orthoRight -= orthoSpeed * deltaTime;
+        }
+
+        // inaltimea ferestrei de proiectie
+        if (window->KeyHold(GLFW_KEY_I)) {
+            orthoTop += orthoSpeed * deltaTime;
+        }
+
+        if (window->KeyHold(GLFW_KEY_K)) {
+            orthoTop -= orthoSpeed * deltaTime;
+        }
+
+        orthoRight = glm::max(orthoRight, 0.1f); // marginea dreapta nu scade sub 0.1 ca sa nu se mai rastoarne imaginea cand ajunge sub
+        orthoTop = glm::max(orthoTop, 0.1f);
+        orthoLeft = -orthoRight;
+        orthoBottom = -orthoTop;
+
+        projectionMatrix = glm::ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, zNear, zFar); // daca nu actualizez projection matrix 
     }
 
 }
@@ -266,8 +297,8 @@ void Lab5::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
             // TODO(student): Rotate the camera in first-person mode around
             // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
             // variables for setting up the rotation speed.
-            camera->RotateFirstPerson_OX(-deltaY * sensivityOX);
-            camera->RotateFirstPerson_OY(-deltaX * sensivityOY);
+            camera->RotateFirstPerson_OX(-deltaY * sensivityOX); // privire sus/jos
+            camera->RotateFirstPerson_OY(-deltaX * sensivityOY); // privire stanga/dreapta
         }
 
         if (window->GetSpecialKeyState() & GLFW_MOD_CONTROL) {
@@ -275,7 +306,7 @@ void Lab5::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
             // TODO(student): Rotate the camera in third-person mode around
             // OX and OY using `deltaX` and `deltaY`. Use the sensitivity
             // variables for setting up the rotation speed.
-            camera->RotateThirdPerson_OX(-deltaY * sensivityOX);
+            camera->RotateThirdPerson_OX(-deltaY * sensivityOX); // rotire in jurul tintei
             camera->RotateThirdPerson_OY(-deltaX * sensivityOY);
 
         }

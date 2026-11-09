@@ -51,14 +51,15 @@ namespace implemented
             // TODO(student): Translate the camera using the `forward` vector.
             // What's the difference between `TranslateForward()` and
             // `MoveForward()`?
-            position += glm::normalize(forward) * distance;
-
+            position += glm::normalize(forward) * distance; // forward = directia in care priveste camera
+                                                            // pozitie veche + directie * distanta
+                                                            // normalize = normalizare = aduce vectorul la lungimea 1 si ii pastreaza directia
         }
 
         void TranslateUpward(float distance)
         {
             // TODO(student): Translate the camera using the `up` vector.
-            position += glm::normalize(up) * distance;
+            position += glm::normalize(up) * distance; // pozitie veche + directia in sus * distanta care trebuie parcursa
 
         }
 
@@ -78,7 +79,7 @@ namespace implemented
             glm::vec3 dir = glm::normalize(glm::vec3(right.x, 0, right.z));
             position += dir * distance;
 
-        }
+        }   
 
         void RotateFirstPerson_OX(float angle)
         {
@@ -120,7 +121,7 @@ namespace implemented
             // TODO(student): Rotate the camera in third-person mode around
             // the OX axis. Use `distanceToTarget` as translation distance.
 
-            TranslateForward(distanceToTarget);
+            TranslateForward(distanceToTarget);  // ca sa se roteasca in jurul tintei, nu pe loc
             RotateFirstPerson_OX(angle);
             TranslateForward(-distanceToTarget);
 
@@ -132,7 +133,7 @@ namespace implemented
             // the OY axis.
 
             TranslateForward(distanceToTarget);
-            RotateFirstPerson_OY(angle);
+            RotateFirstPerson_OY(angle); 
             TranslateForward(-distanceToTarget);
 
         }
