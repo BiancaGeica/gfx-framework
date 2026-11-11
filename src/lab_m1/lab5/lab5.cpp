@@ -58,7 +58,7 @@ void Lab5::Init()
     orthoRight = 0.5f * window->props.aspectRatio;
     orthoLeft = -0.5f * window->props.aspectRatio;
     orthoTop = 0.7f;
-    orthoBottom = -0.7;
+    orthoBottom = -0.7f;
 
     projectionMatrix = glm::perspective(fov, window->props.aspectRatio, zNear, zFar);
 
