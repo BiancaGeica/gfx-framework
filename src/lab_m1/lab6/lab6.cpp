@@ -208,6 +208,19 @@ void Lab6::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelM
     // TODO(student): Set shader uniform "Projection" to projectionMatrix
     glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
 
+    unsigned int location = glGetUniformLocation(shader->program, "Model");
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+    location = glGetUniformLocation(shader->program, "View");
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
+    location = glGetUniformLocation(shader->program, "Projection");
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+    location = glGetUniformLocation(shader->program, "time");
+    float time = Engine::GetElapsedTime();
+    glUniform1f(location, time);
+
     // Draw the object
     glBindVertexArray(mesh->GetBuffers()->m_VAO);
     glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, 0);
