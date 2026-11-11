@@ -29,5 +29,7 @@ namespace m1
 
      protected:
         glm::mat3 modelMatrix;
+        static constexpr float LOGIC_W = 1280.0f;
+        static constexpr float LOGIC_H = 720.0f;
     };
 }   // namespace m1

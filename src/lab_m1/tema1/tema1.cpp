@@ -1,4 +1,5 @@
 #include "lab_m1/tema1/tema1.h"
+#include "lab_m1/tema1/Card.h"
 
 #include <vector>
 #include <iostream>
@@ -28,13 +29,15 @@ Tema1::~Tema1()
 
 void Tema1::Init()
 {
-    glm::ivec2 resolution = window->GetResolution();
     auto camera = GetSceneCamera();
-    camera->SetOrthographic(0, (float)resolution.x, 0, (float)resolution.y, 0.01f, 400);
+    camera->SetOrthographic(0, LOGIC_W, 0, LOGIC_H, 0.01f, 400);
     camera->SetPosition(glm::vec3(0, 0, 50));
     camera->SetRotation(glm::vec3(0, 0, 0));
     camera->Update();
     GetCameraInput()->SetActive(false);
+
+    Mesh* cardRed = object2D::CreateRectangle("card_red", Card::WIDTH, Card::HEIGHT, glm::vec3(1, 0, 0), true);
+    AddMeshToList(cardRed);
 }
 
 
@@ -52,6 +55,9 @@ void Tema1::FrameStart()
 
 void Tema1::Update(float deltaTimeSeconds)
 {
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(LOGIC_W / 2, LOGIC_H / 2);
+    RenderMesh2D(meshes["card_red"], shaders["VertexColor"], modelMatrix);
 }
 
 
