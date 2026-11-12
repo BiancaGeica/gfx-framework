@@ -1,5 +1,4 @@
 #include "lab_m1/tema1/tema1.h"
-#include "lab_m1/tema1/Card.h"
 
 #include <vector>
 #include <iostream>
@@ -36,14 +35,20 @@ void Tema1::Init()
     camera->Update();
     GetCameraInput()->SetActive(false);
 
-    Mesh* cardRed = object2D::CreateRectangle("card_red", Card::WIDTH, Card::HEIGHT, glm::vec3(1, 0, 0), true);
-    AddMeshToList(cardRed);
+    Mesh* card = object2D::CreateRectangle("card", Card::WIDTH, Card::HEIGHT, glm::vec3(1, 1, 1), true);
+    AddMeshToList(card);
 
     Mesh* boardOpponent = object2D::CreateRectangle("opponent_board", 900, 180, glm::vec3(0.3f, 0.1f, 0.1f), true);
     AddMeshToList(boardOpponent);
 
     Mesh* boardPlayer = object2D::CreateRectangle("player_board", 900, 180, glm::vec3(0.1f, 0.1f, 0.3f), true);
     AddMeshToList(boardPlayer);
+
+    placeholderCard = new DamageCard(3, Lane::Melee);
+    placeholderCard->SetPos(glm::vec2(LOGIC_W / 2, LOGIC_H / 2));
+
+    Mesh* hpCard = object2D::CreateRectangle("card_hp", 10, 10, glm::vec3(1, 1, 1), true);
+    AddMeshToList(hpCard);
 }
 
 
@@ -72,8 +77,17 @@ void Tema1::Update(float deltaTimeSeconds)
     RenderMesh2D(meshes["player_board"], shaders["VertexColor"], modelMatrix);
 
     modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(LOGIC_W / 2, LOGIC_H / 2);
-    RenderMesh2D(meshes["card_red"], shaders["VertexColor"], modelMatrix);
+    glm::vec2 cardPos = placeholderCard->GetPos();
+    modelMatrix *= transform2D::Translate(cardPos.x, cardPos.y);
+    // RenderMesh2D(meshes["card"], shaders["VertexColor"], modelMatrix); there is one more function for this that let me pass the color
+    RenderMesh2D(meshes["card"], modelMatrix, placeholderCard->GetColor());
+
+    int valueCard = placeholderCard->GetValue();
+    for (int i = 0; i < valueCard; i++) {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(cardPos.x - Card::WIDTH / 2 + 10 + i * 14, cardPos.y - Card::HEIGHT / 2 + 10); // 4 pixels to the right of the previous square
+        RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+    }
 }
 
 

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "components/simple_scene.h"
-
+#include "lab_m1/tema1/Card.h"
+#include "lab_m1/tema1/DamageCard.h"
 
 namespace m1
 {
@@ -30,6 +31,8 @@ namespace m1
      protected:
         glm::mat3 modelMatrix;
         static constexpr float LOGIC_W = 1280.0f;
-        static constexpr float LOGIC_H = 720.0f;
+        static constexpr float LOGIC_H = 720.0f; // logic because it's not the real size of the screen
+
+        Card* placeholderCard;
     };
 }   // namespace m1
