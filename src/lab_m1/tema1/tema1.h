@@ -35,6 +35,8 @@ namespace m1
         void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
         void OnWindowResize(int width, int height) override;
 
+        void UpdateRow(std::vector<Card*>& row, float y); // everytime I need to move cards I should copy-paste the same code to rearange the player cards
+
      protected:
         glm::mat3 modelMatrix;
         static constexpr float LOGIC_W = 1280.0f; // constexpr is fixed at compile time so I don't write it again in cpp
@@ -49,5 +51,7 @@ namespace m1
 
         // drag and drop
         Card* selectedCard = nullptr; // nullptr means that I don't hold any card
+
+        std::vector<Card*> playerBoard; // the cards that are on the board
     };
 }   // namespace m1

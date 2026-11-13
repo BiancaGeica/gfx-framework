@@ -25,6 +25,18 @@ Tema1::~Tema1()
 {
 }
 
+void Tema1::UpdateRow(std::vector<Card*>& row, float y) {
+    // define where every card should go
+    int numberCardsHand = row.size();
+    float distanceBetweenCards = 10.0f;
+    float rowWidth = numberCardsHand * Card::WIDTH + (numberCardsHand - 1) * distanceBetweenCards;
+    float firstCardX = LOGIC_W / 2 - 70 - rowWidth / 2 + Card::WIDTH / 2; // LOGIC_W / 2 - 70 is the x of the card in the middle
+
+    for (int i = 0; i < numberCardsHand; i++) {
+        row[i]->SetTargetPos(glm::vec2(firstCardX + i * (Card::WIDTH + distanceBetweenCards), y));
+    }
+}
+
 
 void Tema1::Init()
 {
@@ -163,16 +175,8 @@ void Tema1::Update(float deltaTimeSeconds)
         opponentCards.push_back(opponentDeck.back());
         opponentDeck.pop_back();
 
-        // define where every card should go
-        int numberCardsHand = playerCards.size();
-        float distanceBetweenCards = 10.0f;
-        float rowWidth = numberCardsHand * Card::WIDTH + (numberCardsHand - 1) * distanceBetweenCards;
-        float firstCardX = LOGIC_W / 2 - 70 - rowWidth / 2 + Card::WIDTH / 2; // LOGIC_W / 2 - 70 is the x of the card in the middle
-
-        for (int i = 0; i < numberCardsHand; i++) {
-            playerCards[i]->SetTargetPos(glm::vec2(firstCardX + i * (Card::WIDTH + distanceBetweenCards), 100));
-            opponentCards[i]->SetTargetPos(glm::vec2(firstCardX + i * (Card::WIDTH + distanceBetweenCards), LOGIC_H - 100));
-        }
+        UpdateRow(playerCards, 100);
+        UpdateRow(opponentCards, LOGIC_H - 100);
     }
 
     // draw the selected card because it went under other things when being hoovered over the screen and that's not cute
@@ -258,6 +262,28 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button release event
+    glm::ivec2 resolution = window->GetResolution();
+    float x = mouseX * LOGIC_W / resolution.x;
+    float y = (resolution.y - mouseY) * LOGIC_H / resolution.y;
+
+    // move the card from the players inventory to the board
+    if (x >= (LOGIC_W / 2) - 70 - (900 / 2) && x <= (LOGIC_W / 2) - 70 + (900 / 2) && // the board is 900×180
+        y >= (LOGIC_H / 2) - 90 - (180 / 2) && y <= (LOGIC_H / 2) - 90 + (180 / 2)) {
+        if (selectedCard != nullptr) {
+            for (int i = 0; i < playerCards.size(); i++) {
+                if (playerCards[i] == selectedCard) {
+                    playerCards.erase(playerCards.begin() + i); // can't use pop_back() bc the choosen card isn't necessary the last one from hand
+                    playerBoard.push_back(selectedCard); // add the card to the board
+                    
+                    break;
+                }
+            }
+            UpdateRow(playerCards, 100);
+            UpdateRow(playerBoard, LOGIC_H / 2 - 90);
+        }
+        cout << "on board\n";
+    }
+
     selectedCard = nullptr; // without this the card gets stuck on the mouse
 }
 
