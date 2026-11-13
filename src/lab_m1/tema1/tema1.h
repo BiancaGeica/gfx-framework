@@ -40,13 +40,14 @@ namespace m1
         static constexpr float LOGIC_W = 1280.0f; // constexpr is fixed at compile time so I don't write it again in cpp
         static constexpr float LOGIC_H = 720.0f; // logic because it's not the real size of the screen
 
-        Card* placeholderCard;
-
         std::vector<Card*> playerCards;
         std::vector<Card*> opponentCards;
 
         std::vector<Card*> playerDeck;
         std::vector<Card*> opponentDeck;
-        float timeSincePreviousCard = 0; 
+        float timeSincePreviousCard = 0;
+
+        // drag and drop
+        Card* selectedCard = nullptr; // nullptr means that I don't hold any card
     };
 }   // namespace m1

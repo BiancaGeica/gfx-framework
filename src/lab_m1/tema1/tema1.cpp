@@ -44,12 +44,6 @@ void Tema1::Init()
     Mesh* boardPlayer = object2D::CreateRectangle("player_board", 900, 180, glm::vec3(0.1f, 0.1f, 0.3f), true);
     AddMeshToList(boardPlayer);
 
-    placeholderCard = new DamageCard(3, Lane::Melee);
-    placeholderCard->SetPos(glm::vec2(LOGIC_W / 2, LOGIC_H / 2));
-
-    Mesh* hpCard = object2D::CreateRectangle("card_hp", 10, 10, glm::vec3(1, 1, 1), true);
-    AddMeshToList(hpCard);
-
     // the cards that the player receives from the deck in the begining
     playerDeck.push_back(new DamageCard(3, Lane::Melee));
     playerDeck.push_back(new ShieldCard(4, Lane::Siege));
@@ -128,7 +122,13 @@ void Tema1::Update(float deltaTimeSeconds)
     // players cards
     for (int i = 0; i < playerCards.size(); i++) {
         Card* card = playerCards[i];
+
+        if (card == selectedCard) {
+            continue; // this warning is a drama queen because it could never be NULL
+        }
+
         card->UpdateAnimation(deltaTimeSeconds); // slide the cards on their place
+
         glm::vec2 positionCurrentCard = card->GetPos();
 
         modelMatrix = glm::mat3(1);
@@ -174,6 +174,21 @@ void Tema1::Update(float deltaTimeSeconds)
             opponentCards[i]->SetTargetPos(glm::vec2(firstCardX + i * (Card::WIDTH + distanceBetweenCards), LOGIC_H - 100));
         }
     }
+
+    // draw the selected card because it went under other things when being hoovered over the screen and that's not cute
+    if (selectedCard != nullptr) {
+        glm::vec2 positionCurrentCard = selectedCard->GetPos();
+
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
+        RenderMesh2D(meshes["card"], modelMatrix, selectedCard->GetColor());
+
+        for (int i = 0; i < selectedCard->GetValue(); i++) {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 10 + i * 14, positionCurrentCard.y - Card::HEIGHT / 2 + 10); // 4 pixels to the right of the previous square
+            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+        }
+    }
 }
 
 
@@ -208,18 +223,42 @@ void Tema1::OnKeyRelease(int key, int mods)
 void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
     // Add mouse move event
+    glm::ivec2 resolution = window->GetResolution();
+
+    if (selectedCard != nullptr) {
+        float x = mouseX * LOGIC_W / resolution.x;
+        float y = (resolution.y - mouseY) * LOGIC_H / resolution.y;
+
+        selectedCard->SetPos(glm::vec2(x, y));
+    }
 }
 
 
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button press event
+    // cout << "Pixel x = " << mouseX << " Pixel y = " << mouseY << "\n";
+    glm::ivec2 resolution = window->GetResolution();
+
+    // because the mouse coordinates are in pixels and the cards in logical coordinates, i should convert the mouse ones
+    float x = mouseX * LOGIC_W / resolution.x;
+    float y = (resolution.y - mouseY) * LOGIC_H / resolution.y;
+    // cout << "Logical x = " << x << " Logical y = " << y << "\n";
+
+    // logic when a card is selected
+    for (int i = 0; i < playerCards.size(); i++) {
+        if (playerCards[i]->IsMouseOver(x, y)) {
+            selectedCard = playerCards[i];
+            // cout << "picked " << selectedCard->GetPos().x << "\n";
+        }
+    }
 }
 
 
 void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button release event
+    selectedCard = nullptr; // without this the card gets stuck on the mouse
 }
 
 
