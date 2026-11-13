@@ -43,8 +43,10 @@ namespace m1
         Card* placeholderCard;
 
         std::vector<Card*> playerCards;
+        std::vector<Card*> opponentCards;
 
         std::vector<Card*> playerDeck;
+        std::vector<Card*> opponentDeck;
         float timeSincePreviousCard = 0; 
     };
 }   // namespace m1
