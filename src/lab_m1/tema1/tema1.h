@@ -66,5 +66,7 @@ namespace m1
         // timer for opponent
         bool opponentTurn = false;
         float opponentDelay = 0;
+
+        bool gameOver = false;
     };
 }   // namespace m1

@@ -64,6 +64,11 @@ void Tema1::ApplyEffects() {
 
     UpdateRow(playerBoard, LOGIC_H / 2 - 90);
     UpdateRow(opponentBoard, LOGIC_H / 2 + 90);
+
+    if (player->IsDone() || opponent->IsDone() ||
+        (playerCards.empty() && opponentCards.empty())) {
+        gameOver = true;
+    }
 }
 
 void Tema1::Init()
@@ -133,14 +138,28 @@ void Tema1::FrameStart()
 
 void Tema1::Update(float deltaTimeSeconds)
 {
+    glm::vec3 playerBoardColor = glm::vec3(0.1f, 0.1f, 0.3f); // used to change the color of the boards to show who won
+    glm::vec3 opponentBoardColor = glm::vec3(0.3f, 0.1f, 0.1f);
+
+    if (gameOver) { // i need to show who won
+        if (player->GetHp() > opponent->GetHp()) { // player won
+            playerBoardColor = glm::vec3(0, 1, 0);
+            opponentBoardColor = glm::vec3(1, 0, 0);
+        }
+        else {
+            playerBoardColor = glm::vec3(1, 0, 0);
+            opponentBoardColor = glm::vec3(0, 1, 0);
+        }
+    }
+    
     // the board
     modelMatrix = glm::mat3(1);
     modelMatrix *= transform2D::Translate(LOGIC_W / 2 - 70, LOGIC_H / 2 + 90);
-    RenderMesh2D(meshes["opponent_board"], shaders["VertexColor"], modelMatrix);
+    RenderMesh2D(meshes["opponent_board"], modelMatrix, opponentBoardColor);
 
     modelMatrix = glm::mat3(1);
     modelMatrix *= transform2D::Translate(LOGIC_W / 2 - 70, LOGIC_H / 2 - 90);
-    RenderMesh2D(meshes["player_board"], shaders["VertexColor"], modelMatrix);
+    RenderMesh2D(meshes["player_board"], modelMatrix, playerBoardColor);
 
     // the players deck
     modelMatrix = glm::mat3(1);
@@ -362,6 +381,10 @@ void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button press event
+    if (gameOver) {
+        return;
+    }
+
     if (opponentTurn) return;
 
     // cout << "Pixel x = " << mouseX << " Pixel y = " << mouseY << "\n";
