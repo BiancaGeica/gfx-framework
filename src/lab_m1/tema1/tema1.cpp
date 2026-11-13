@@ -50,20 +50,20 @@ void Tema1::Init()
     Mesh* hpCard = object2D::CreateRectangle("card_hp", 10, 10, glm::vec3(1, 1, 1), true);
     AddMeshToList(hpCard);
 
-    playerCards.push_back(new DamageCard(3, Lane::Melee));
-    playerCards.push_back(new ShieldCard(4, Lane::Siege));
-    playerCards.push_back(new HealCard(2, Lane::Ranged));
-    playerCards.push_back(new FrostCard(2));
-    playerCards.push_back(new ScorchCard(3, Lane::Melee));
+    playerDeck.push_back(new DamageCard(3, Lane::Melee));
+    playerDeck.push_back(new ShieldCard(4, Lane::Siege));
+    playerDeck.push_back(new HealCard(2, Lane::Ranged));
+    playerDeck.push_back(new FrostCard(2));
+    playerDeck.push_back(new ScorchCard(3, Lane::Melee));
 
     int numberCardsHand = playerCards.size();
     float distanceBetweenCards = 10.0f;
     float rowWidth = numberCardsHand * Card::WIDTH + (numberCardsHand - 1) * distanceBetweenCards;
     float firstCardX = LOGIC_W / 2 - 70 - rowWidth / 2 + Card::WIDTH / 2; // LOGIC_W / 2 - 70 is the x of the card in the middle
 
-    for (int i = 0; i < numberCardsHand; i++) {
-        playerCards[i]->SetTargetPos(glm::vec2(firstCardX + i * (Card::WIDTH + distanceBetweenCards), 100)); // SetTargetPos bc i want to point where the card should go
-    }                                                                                                       // 80 because the card is 120px tall, so the middle is at 60 and i want a little gap down
+    for (int i = 0; i < playerDeck.size(); i++) {
+        playerDeck[i]->SetPos(glm::vec2(LOGIC_W - 120 - 10, LOGIC_H / 2 - 90 - 10));
+    }
 }
 
 
@@ -83,6 +83,7 @@ void Tema1::FrameStart()
 
 void Tema1::Update(float deltaTimeSeconds)
 {
+    // the board
     modelMatrix = glm::mat3(1);
     modelMatrix *= transform2D::Translate(LOGIC_W / 2 - 70, LOGIC_H / 2 + 90);
     RenderMesh2D(meshes["opponent_board"], shaders["VertexColor"], modelMatrix);
@@ -91,12 +92,14 @@ void Tema1::Update(float deltaTimeSeconds)
     modelMatrix *= transform2D::Translate(LOGIC_W / 2 - 70, LOGIC_H / 2 - 90);
     RenderMesh2D(meshes["player_board"], shaders["VertexColor"], modelMatrix);
 
+    // test card
     modelMatrix = glm::mat3(1);
     glm::vec2 cardPos = placeholderCard->GetPos();
     modelMatrix *= transform2D::Translate(cardPos.x, cardPos.y);
     // RenderMesh2D(meshes["card"], shaders["VertexColor"], modelMatrix); there is one more function for this that let me pass the color
     RenderMesh2D(meshes["card"], modelMatrix, placeholderCard->GetColor());
 
+    // hp points of the test card on the board
     int valueCard = placeholderCard->GetValue();
     for (int i = 0; i < valueCard; i++) {
         modelMatrix = glm::mat3(1);
@@ -104,6 +107,7 @@ void Tema1::Update(float deltaTimeSeconds)
         RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
     }
 
+    // players cards
     for (int i = 0; i < playerCards.size(); i++) {
         Card* card = playerCards[i];
         card->UpdateAnimation(deltaTimeSeconds); // slide the cards on their place
@@ -117,6 +121,37 @@ void Tema1::Update(float deltaTimeSeconds)
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 10 + i * 14, positionCurrentCard.y - Card::HEIGHT / 2 + 10); // 4 pixels to the right of the previous square
             RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+        }
+    }
+
+    // the players deck
+    modelMatrix = glm::mat3(1);
+    modelMatrix = transform2D::Translate(LOGIC_W - 120, LOGIC_H / 2 - 90);
+    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.2f, 0.2f, 0.3f));
+
+    modelMatrix = glm::mat3(1);
+    modelMatrix = transform2D::Translate(LOGIC_W - 120 - 5, LOGIC_H / 2 - 90 - 5);
+    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.54f, 0.17f, 0.88f));
+
+    modelMatrix = glm::mat3(1);
+    modelMatrix = transform2D::Translate(LOGIC_W - 120 - 10, LOGIC_H / 2 - 90 - 10);
+    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.55f, 0.0f, 0.55f));
+
+    // cards flying out of deck animation
+    timeSincePreviousCard += deltaTimeSeconds;
+    if (timeSincePreviousCard > 0.4f && !playerDeck.empty()) { // can't decide between 0.3 and 0.4 //COME BACK LATERRR
+        timeSincePreviousCard = 0;
+        playerCards.push_back(playerDeck.back()); // takes the card that is on top
+        playerDeck.pop_back(); // removes the card from the deck
+
+        // define where every card should go
+        int numberCardsHand = playerCards.size();
+        float distanceBetweenCards = 10.0f;
+        float rowWidth = numberCardsHand * Card::WIDTH + (numberCardsHand - 1) * distanceBetweenCards;
+        float firstCardX = LOGIC_W / 2 - 70 - rowWidth / 2 + Card::WIDTH / 2; // LOGIC_W / 2 - 70 is the x of the card in the middle
+
+        for (int i = 0; i < numberCardsHand; i++) {
+            playerCards[i]->SetTargetPos(glm::vec2(firstCardX + i * (Card::WIDTH + distanceBetweenCards), 100));
         }
     }
 }

@@ -37,11 +37,14 @@ namespace m1
 
      protected:
         glm::mat3 modelMatrix;
-        static constexpr float LOGIC_W = 1280.0f;
+        static constexpr float LOGIC_W = 1280.0f; // constexpr is fixed at compile time so I don't write it again in cpp
         static constexpr float LOGIC_H = 720.0f; // logic because it's not the real size of the screen
 
         Card* placeholderCard;
 
         std::vector<Card*> playerCards;
+
+        std::vector<Card*> playerDeck;
+        float timeSincePreviousCard = 0; 
     };
 }   // namespace m1
