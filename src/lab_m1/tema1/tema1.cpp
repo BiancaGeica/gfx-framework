@@ -39,43 +39,43 @@ void Tema1::UpdateRow(std::vector<Card*>& row, float y) {
 
 void Tema1::ApplyEffects() {
     for (int priority = 0; priority < 8; priority++) {
-        for (int i = 0; i < playerBoard.size(); i++) {
-            if (playerBoard[i]->GetPriority() == priority) {
-                playerBoard[i]->ApplyTurnEffect(*player, *opponent);
+        for (int i = 0; i < player->GetBoard().size(); i++) {
+            if (player->GetBoard()[i]->GetPriority() == priority) {
+                player->GetBoard()[i]->ApplyTurnEffect(*player, *opponent);
             }
             
         }
 
-        for (int i = 0; i < opponentBoard.size(); i++) {
-            if (opponentBoard[i]->GetPriority() == priority) {
-                opponentBoard[i]->ApplyTurnEffect(*opponent, *player);
+        for (int i = 0; i < opponent->GetBoard().size(); i++) {
+            if (opponent->GetBoard()[i]->GetPriority() == priority) {
+                opponent->GetBoard()[i]->ApplyTurnEffect(*opponent, *player);
             }
         }
     }
 
-    for (int i = 0; i < playerBoard.size(); i++) {
-        playerBoard[i]->AfterTurn(); // the permanent cards ignore it because of polymorphism (the base AfterTurn is empty)
+    for (int i = 0; i < player->GetBoard().size(); i++) {
+        player->GetBoard()[i]->AfterTurn(); // the permanent cards ignore it because of polymorphism (the base AfterTurn is empty)
     }
-    for (int i = 0; i < opponentBoard.size(); i++) {
-        opponentBoard[i]->AfterTurn(); // lowers the value by 1 of the temporary cards
+    for (int i = 0; i < opponent->GetBoard().size(); i++) {
+        opponent->GetBoard()[i]->AfterTurn(); // lowers the value by 1 of the temporary cards
     }
 
-    for (int i = playerBoard.size() - 1; i >= 0; i--) {
-        if (playerBoard[i]->IsDestroyed()) {
-            delete playerBoard[i]; // delete is the reverse of new, is used to free memory
-            playerBoard.erase(playerBoard.begin() + i);
+    for (int i = player->GetBoard().size() - 1; i >= 0; i--) {
+        if (player->GetBoard()[i]->IsDestroyed()) {
+            delete player->GetBoard()[i]; // delete is the reverse of new, is used to free memory
+            player->GetBoard().erase(player->GetBoard().begin() + i);
         }
     }
 
-    for (int i = opponentBoard.size() - 1; i >= 0; i--) {
-        if (opponentBoard[i]->IsDestroyed()) {
-            delete opponentBoard[i];
-            opponentBoard.erase(opponentBoard.begin() + i);
+    for (int i = opponent->GetBoard().size() - 1; i >= 0; i--) {
+        if (opponent->GetBoard()[i]->IsDestroyed()) {
+            delete opponent->GetBoard()[i];
+            opponent->GetBoard().erase(opponent->GetBoard().begin() + i);
         }
     }
 
-    UpdateRow(playerBoard, LOGIC_H / 2 - 90);
-    UpdateRow(opponentBoard, LOGIC_H / 2 + 90);
+    UpdateRow(player->GetBoard(), LOGIC_H / 2 - 90);
+    UpdateRow(opponent->GetBoard(), LOGIC_H / 2 + 90);
 
     if (player->IsDone() || opponent->IsDone() ||
         (playerCards.empty() && opponentCards.empty())) {
@@ -204,8 +204,8 @@ void Tema1::Update(float deltaTimeSeconds)
     RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.55f, 0.0f, 0.55f));
 
     // players cards that are on the board
-    for (int i = 0; i < playerBoard.size(); i++) {
-        Card* card = playerBoard[i];
+    for (int i = 0; i < player->GetBoard().size(); i++) {
+        Card* card = player->GetBoard()[i];
 
         card->UpdateAnimation(deltaTimeSeconds); // slide the cards on their place
 
@@ -312,8 +312,8 @@ void Tema1::Update(float deltaTimeSeconds)
     }
 
     // opponent cards that are on the board
-    for (int i = 0; i < opponentBoard.size(); i++) {
-        Card* card = opponentBoard[i];
+    for (int i = 0; i < opponent->GetBoard().size(); i++) {
+        Card* card = opponent->GetBoard()[i];
 
         card->UpdateAnimation(deltaTimeSeconds); // slide the cards on their place
 
@@ -338,11 +338,13 @@ void Tema1::Update(float deltaTimeSeconds)
         if (opponentDelay > 1.0f) {
             if (!opponentCards.empty()) { // could be 0, then rand would go kapoot
                 int random = rand() % opponentCards.size();
-                opponentBoard.push_back(opponentCards[random]);
+                opponent->GetBoard().push_back(opponentCards[random]);
+                opponent->SetLastCardPlayed(opponentCards[random]); // for Scorch, it saves the last played card
+
                 opponentCards.erase(opponentCards.begin() + random);
 
                 UpdateRow(opponentCards, LOGIC_H - 100);
-                UpdateRow(opponentBoard, LOGIC_H / 2 + 90);
+                UpdateRow(opponent->GetBoard(), LOGIC_H / 2 + 90);
             }
 
             ApplyEffects(); // make the cards do things
@@ -435,13 +437,14 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
             for (int i = 0; i < playerCards.size(); i++) {
                 if (playerCards[i] == selectedCard) {
                     playerCards.erase(playerCards.begin() + i); // can't use pop_back() bc the choosen card isn't necessary the last one from hand
-                    playerBoard.push_back(selectedCard); // add the card to the board
+                    player->GetBoard().push_back(selectedCard); // add the card to the board
+                    player->SetLastCardPlayed(selectedCard);
                     
                     break;
                 }
             }
             UpdateRow(playerCards, 100);
-            UpdateRow(playerBoard, LOGIC_H / 2 - 90);
+            UpdateRow(player->GetBoard(), LOGIC_H / 2 - 90);
 
             opponentTurn = true;
             opponentDelay = 0;

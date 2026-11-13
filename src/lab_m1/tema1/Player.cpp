@@ -39,3 +39,15 @@ int Player::GetShield() const {
 bool Player::IsDone() const {
 	return (hp <= 0);
 }
+
+std::vector<Card*>& Player::GetBoard() {
+	return board;
+}
+
+Card* Player::GetLastCardPlayed() const {
+	return lastCardPlayed;
+}
+
+void Player::SetLastCardPlayed(Card* card) {
+	lastCardPlayed = card;
+}
