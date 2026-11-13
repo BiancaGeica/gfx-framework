@@ -14,7 +14,7 @@ int FrostCard::GetPriority() const {
 	return 3;
 }
 
-void FrostCard::ApplyTurnEffect(Game& game, Player& owner) {
+void FrostCard::ApplyTurnEffect(Player& owner, Player& opponent) {
 	// TO-DO: when I implement game and player add this
 	// lower the value of all the opponent's cards by 1
 }

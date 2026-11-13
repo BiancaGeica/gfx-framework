@@ -14,7 +14,7 @@ Card::Card(int value, Lane lane) :
 	cancelled(false)
 {} // body
 
-void Card::OnPlay(Game& game, Player& owner) {
+void Card::OnPlay(Player& owner, Player& opponent) {
 	// For Spy, Medic and Decoy
 }
 

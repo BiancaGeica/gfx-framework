@@ -10,6 +10,7 @@
 #include "lab_m1/tema1/ScorchCard.h"
 #include "lab_m1/tema1/FrostCard.h"
 #include "lab_m1/tema1/ClearWeatherCard.h"
+#include "lab_m1/tema1/Player.h"
 
 namespace m1
 {
@@ -37,6 +38,8 @@ namespace m1
 
         void UpdateRow(std::vector<Card*>& row, float y); // everytime I need to move cards I should copy-paste the same code to rearange the player cards
 
+        void ApplyEffects();
+
      protected:
         glm::mat3 modelMatrix;
         static constexpr float LOGIC_W = 1280.0f; // constexpr is fixed at compile time so I don't write it again in cpp
@@ -53,5 +56,9 @@ namespace m1
         Card* selectedCard = nullptr; // nullptr means that I don't hold any card
 
         std::vector<Card*> playerBoard; // the cards that are on the board
+
+        // time to show the HP on the screen
+        Player* player;
+        Player* opponent;
     };
 }   // namespace m1

@@ -14,7 +14,7 @@ int ClearWeatherCard::GetPriority() const {
 	return 2;
 }
 
-void ClearWeatherCard::ApplyTurnEffect(Game& game, Player& owner) {
+void ClearWeatherCard::ApplyTurnEffect(Player& owner, Player& opponent) {
 	// TO-DO: when I implement game and player add this
 	// remove all weather effects for both players
 }

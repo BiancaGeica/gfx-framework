@@ -1,8 +1,8 @@
 #pragma once // includes the file a single time
 
 #include "utils/glm_utils.h" // glm::vec2, glm::vec3
+#include "lab_m1/tema1/Player.h"
 
-class Game;
 class Player; // declared before because Card is using them
 
 enum class Lane {Melee, Ranged, Siege, DoesntMatter};
@@ -24,11 +24,11 @@ public:
 											// = 0 => card doesn't have her own version so every single card is ~*~forced~*~ to write one
 	virtual CardType GetType() const = 0;
 	virtual int GetPriority() const = 0;
-	virtual void ApplyTurnEffect(Game& game, Player& owner) = 0; // receives the game and the current player that has the card
+	virtual void ApplyTurnEffect(Player& owner, Player& opponent) = 0; // receives the players
 																 // this one is not const because it should change things
 
 	// Optionals, so I don't mark them with = 0 to force their implementation, I don't need them yet for every card
-	virtual void OnPlay(Game& game, Player& owner); // only for Spy, Medic and Decoy
+	virtual void OnPlay(Player& owner, Player& opponent); // only for Spy, Medic and Decoy
 	virtual void AfterTurn();
 	virtual bool IsTemporary() const; // const is used so I don't modify the object, just read it
 	virtual bool CanBeOnLane(Lane newLane) const; // verify if the card could be placed on the specified lane

@@ -14,7 +14,7 @@ int ScorchCard::GetPriority() const {
 	return 0;
 }
 
-void ScorchCard::ApplyTurnEffect(Game& game, Player& owner) {
+void ScorchCard::ApplyTurnEffect(Player& owner, Player& opponent) {
 	// TO-DO: when I implement game and player add this
 	// cancels the opponent's card effect in the current turn if the opponent's card value is grater or equal with V 
 }

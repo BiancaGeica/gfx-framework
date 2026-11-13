@@ -14,7 +14,7 @@ int HealCard::GetPriority() const {
 	return 7; // the lower number has a higher priority
 }
 
-void HealCard::ApplyTurnEffect(Game& game, Player& owner) {
-	// TO-DO: when I implement Game and Player add owner.Heal(value);
+void HealCard::ApplyTurnEffect(Player& owner, Player& opponent) {
+	owner.Heal(value);
 }
 

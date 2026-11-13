@@ -14,6 +14,6 @@ int DamageCard::GetPriority() const {
 	return 6; // the lower number has a higher priority
 }
 
-void DamageCard::ApplyTurnEffect(Game& game, Player& owner) {
-	// TO-DO: when I implement Game and Player add game.GetOpponent(owner).TakeDamage(value);
+void DamageCard::ApplyTurnEffect(Player& owner, Player& opponent) {
+	opponent.TakeDamage(value);
 }

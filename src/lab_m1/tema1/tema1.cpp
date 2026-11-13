@@ -37,6 +37,11 @@ void Tema1::UpdateRow(std::vector<Card*>& row, float y) {
     }
 }
 
+void Tema1::ApplyEffects() {
+    for (int i = 0; i < playerBoard.size(); i++) {
+        playerBoard[i]->ApplyTurnEffect(*player, *opponent);
+    }
+}
 
 void Tema1::Init()
 {
@@ -55,6 +60,12 @@ void Tema1::Init()
 
     Mesh* boardPlayer = object2D::CreateRectangle("player_board", 900, 180, glm::vec3(0.1f, 0.1f, 0.3f), true);
     AddMeshToList(boardPlayer);
+
+    Mesh* hpCard = object2D::CreateRectangle("card_hp", 10, 10, glm::vec3(1, 1, 1), true);
+    AddMeshToList(hpCard);
+
+    Mesh* hpPlayer = object2D::CreateRectangle("player_hp", 10, 10, glm::vec3(0.18f, 0.54f, 0.34f), true);
+    AddMeshToList(hpPlayer);
 
     // the cards that the player receives from the deck in the begining
     playerDeck.push_back(new DamageCard(3, Lane::Melee));
@@ -77,6 +88,9 @@ void Tema1::Init()
     for (int i = 0; i < opponentDeck.size(); i++) {
         opponentDeck[i]->SetPos(glm::vec2(LOGIC_W - 120 - 10, LOGIC_H / 2 + 90 + 10));
     }
+
+    player = new Player(20);
+    opponent = new Player(20);
 }
 
 
@@ -212,6 +226,32 @@ void Tema1::Update(float deltaTimeSeconds)
             RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
         }
     }
+
+    // draw the HP for both players
+    for (int i = 0; i < player->GetHp(); i++) {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(200 + (i % 5) * 14, 60 + (i / 5) * 14);
+        RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.18f, 0.54f, 0.34f));
+    }
+
+    for (int i = 0; i < opponent->GetHp(); i++) {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(200 + (i % 5) * 14, LOGIC_H - 60 - (i / 5) * 14);
+        RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.18f, 0.54f, 0.34f));
+    }
+
+    // draw shield points for both players
+    for (int i = 0; i < player->GetShield(); i++) {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(200 + (i % 5) * 14, 60 + 5 * 14 + (i / 5) * 14);
+        RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.0f, 0.80f, 0.82f));
+    }
+
+    for (int i = 0; i < opponent->GetShield(); i++) {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(200 + (i % 5) * 14, LOGIC_H - 60 - 5 * 14 - (i / 5) * 14);
+        RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.0f, 0.80f, 0.82f));
+    }
 }
 
 
@@ -299,8 +339,9 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
             }
             UpdateRow(playerCards, 100);
             UpdateRow(playerBoard, LOGIC_H / 2 - 90);
+            ApplyEffects(); // make the cards do things
         }
-        cout << "on board\n";
+        // cout << "on board\n";
     }
 
     selectedCard = nullptr; // without this the card gets stuck on the mouse

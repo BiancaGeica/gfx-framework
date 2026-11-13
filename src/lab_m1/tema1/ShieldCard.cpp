@@ -14,7 +14,7 @@ int ShieldCard::GetPriority() const {
 	return 5; // the lower number has a higher priority
 }
 
-void ShieldCard::ApplyTurnEffect(Game& game, Player& owner) {
-	// TO-DO: when I implement Game and Player add owner.AddShield(value);
+void ShieldCard::ApplyTurnEffect(Player& owner, Player& opponent) {
+	owner.AddShield(value);
 }
 
