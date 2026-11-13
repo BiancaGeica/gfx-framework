@@ -15,6 +15,7 @@ int FrostCard::GetPriority() const {
 }
 
 void FrostCard::ApplyTurnEffect(Player& owner, Player& opponent) {
-	// TO-DO: when I implement game and player add this
-	// lower the value of all the opponent's cards by 1
+	for (int i = 0; i < opponent.GetBoard().size(); i++) {
+		opponent.GetBoard()[i]->ModifyValue(-1);
+	}
 }

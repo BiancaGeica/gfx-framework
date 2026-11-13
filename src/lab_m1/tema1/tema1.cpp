@@ -40,14 +40,14 @@ void Tema1::UpdateRow(std::vector<Card*>& row, float y) {
 void Tema1::ApplyEffects() {
     for (int priority = 0; priority < 8; priority++) {
         for (int i = 0; i < player->GetBoard().size(); i++) {
-            if (player->GetBoard()[i]->GetPriority() == priority) {
+            if (player->GetBoard()[i]->GetPriority() == priority && !player->GetBoard()[i]->IsDestroyed()) {
                 player->GetBoard()[i]->ApplyTurnEffect(*player, *opponent);
             }
-            
+
         }
 
         for (int i = 0; i < opponent->GetBoard().size(); i++) {
-            if (opponent->GetBoard()[i]->GetPriority() == priority) {
+            if (opponent->GetBoard()[i]->GetPriority() == priority && !opponent->GetBoard()[i]->IsDestroyed()) {
                 opponent->GetBoard()[i]->ApplyTurnEffect(*opponent, *player);
             }
         }
