@@ -38,14 +38,26 @@ void Tema1::UpdateRow(std::vector<Card*>& row, float y) {
 }
 
 void Tema1::ApplyEffects() {
-    for (int i = 0; i < playerBoard.size(); i++) {
-        playerBoard[i]->ApplyTurnEffect(*player, *opponent);
-        playerBoard[i]->AfterTurn(); // the permanent cards ignore it because of polymorphism (the base AfterTurn is empty)
+    for (int priority = 0; priority < 8; priority++) {
+        for (int i = 0; i < playerBoard.size(); i++) {
+            if (playerBoard[i]->GetPriority() == priority) {
+                playerBoard[i]->ApplyTurnEffect(*player, *opponent);
+            }
+            
+        }
+
+        for (int i = 0; i < opponentBoard.size(); i++) {
+            if (opponentBoard[i]->GetPriority() == priority) {
+                opponentBoard[i]->ApplyTurnEffect(*opponent, *player);
+            }
+        }
     }
 
+    for (int i = 0; i < playerBoard.size(); i++) {
+        playerBoard[i]->AfterTurn(); // the permanent cards ignore it because of polymorphism (the base AfterTurn is empty)
+    }
     for (int i = 0; i < opponentBoard.size(); i++) {
-        opponentBoard[i]->ApplyTurnEffect(*opponent, *player);
-        opponentBoard[i]->AfterTurn(); // lowers the value by 1 of the temporary cards 
+        opponentBoard[i]->AfterTurn(); // lowers the value by 1 of the temporary cards
     }
 
     for (int i = playerBoard.size() - 1; i >= 0; i--) {
@@ -141,13 +153,17 @@ void Tema1::Update(float deltaTimeSeconds)
     glm::vec3 playerBoardColor = glm::vec3(0.1f, 0.1f, 0.3f); // used to change the color of the boards to show who won
     glm::vec3 opponentBoardColor = glm::vec3(0.3f, 0.1f, 0.1f);
 
-    if (gameOver) { // i need to show who won
-        if (player->GetHp() > opponent->GetHp()) { // player won
+    if (gameOver) {
+        if (player->GetHp() == opponent->GetHp()) { // draw
+            playerBoardColor = glm::vec3(1, 1, 0);
+            opponentBoardColor = glm::vec3(1, 1, 0);
+        }
+        else if (player->GetHp() > opponent->GetHp()) { // player won
             playerBoardColor = glm::vec3(0, 1, 0);
             opponentBoardColor = glm::vec3(1, 0, 0);
         }
         else {
-            playerBoardColor = glm::vec3(1, 0, 0);
+            playerBoardColor = glm::vec3(1, 0, 0); // opponent won
             opponentBoardColor = glm::vec3(0, 1, 0);
         }
     }
