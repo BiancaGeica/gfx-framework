@@ -1,8 +1,15 @@
 #pragma once
 
+#include <vector>
+
 #include "components/simple_scene.h"
 #include "lab_m1/tema1/Card.h"
 #include "lab_m1/tema1/DamageCard.h"
+#include "lab_m1/tema1/HealCard.h"
+#include "lab_m1/tema1/ShieldCard.h"
+#include "lab_m1/tema1/ScorchCard.h"
+#include "lab_m1/tema1/FrostCard.h"
+#include "lab_m1/tema1/ClearWeatherCard.h"
 
 namespace m1
 {
@@ -34,5 +41,7 @@ namespace m1
         static constexpr float LOGIC_H = 720.0f; // logic because it's not the real size of the screen
 
         Card* placeholderCard;
+
+        std::vector<Card*> playerCards;
     };
 }   // namespace m1

@@ -49,6 +49,21 @@ void Tema1::Init()
 
     Mesh* hpCard = object2D::CreateRectangle("card_hp", 10, 10, glm::vec3(1, 1, 1), true);
     AddMeshToList(hpCard);
+
+    playerCards.push_back(new DamageCard(3, Lane::Melee));
+    playerCards.push_back(new ShieldCard(4, Lane::Siege));
+    playerCards.push_back(new HealCard(2, Lane::Ranged));
+    playerCards.push_back(new FrostCard(2));
+    playerCards.push_back(new ScorchCard(3, Lane::Melee));
+
+    int numberCardsHand = playerCards.size();
+    float distanceBetweenCards = 10.0f;
+    float rowWidth = numberCardsHand * Card::WIDTH + (numberCardsHand - 1) * distanceBetweenCards;
+    float firstCardX = LOGIC_W / 2 - 70 - rowWidth / 2 + Card::WIDTH / 2; // LOGIC_W / 2 - 70 is the x of the card in the middle
+
+    for (int i = 0; i < numberCardsHand; i++) {
+        playerCards[i]->SetTargetPos(glm::vec2(firstCardX + i * (Card::WIDTH + distanceBetweenCards), 100)); // SetTargetPos bc i want to point where the card should go
+    }                                                                                                       // 80 because the card is 120px tall, so the middle is at 60 and i want a little gap down
 }
 
 
@@ -87,6 +102,22 @@ void Tema1::Update(float deltaTimeSeconds)
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(cardPos.x - Card::WIDTH / 2 + 10 + i * 14, cardPos.y - Card::HEIGHT / 2 + 10); // 4 pixels to the right of the previous square
         RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+    }
+
+    for (int i = 0; i < playerCards.size(); i++) {
+        Card* card = playerCards[i];
+        card->UpdateAnimation(deltaTimeSeconds); // slide the cards on their place
+        glm::vec2 positionCurrentCard = card->GetPos();
+
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
+        RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
+
+        for (int i = 0; i < card->GetValue(); i++) {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 10 + i * 14, positionCurrentCard.y - Card::HEIGHT / 2 + 10); // 4 pixels to the right of the previous square
+            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+        }
     }
 }
 
