@@ -131,6 +131,25 @@ void Tema1::Update(float deltaTimeSeconds)
     modelMatrix = transform2D::Translate(LOGIC_W - 120 - 10, LOGIC_H / 2 + 90 + 10);
     RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.55f, 0.0f, 0.55f));
 
+    // players cards that are on the board
+    for (int i = 0; i < playerBoard.size(); i++) {
+        Card* card = playerBoard[i];
+
+        card->UpdateAnimation(deltaTimeSeconds); // slide the cards on their place
+
+        glm::vec2 positionCurrentCard = card->GetPos();
+
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
+        RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
+
+        for (int i = 0; i < card->GetValue(); i++) {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 10 + i * 14, positionCurrentCard.y - Card::HEIGHT / 2 + 10); // 4 pixels to the right of the previous square
+            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+        }
+    }
+
     // players cards
     for (int i = 0; i < playerCards.size(); i++) {
         Card* card = playerCards[i];
