@@ -40,11 +40,30 @@ void Tema1::UpdateRow(std::vector<Card*>& row, float y) {
 void Tema1::ApplyEffects() {
     for (int i = 0; i < playerBoard.size(); i++) {
         playerBoard[i]->ApplyTurnEffect(*player, *opponent);
+        playerBoard[i]->AfterTurn(); // the permanent cards ignore it because of polymorphism (the base AfterTurn is empty)
     }
 
     for (int i = 0; i < opponentBoard.size(); i++) {
         opponentBoard[i]->ApplyTurnEffect(*opponent, *player);
+        opponentBoard[i]->AfterTurn(); // lowers the value by 1 of the temporary cards 
     }
+
+    for (int i = playerBoard.size() - 1; i >= 0; i--) {
+        if (playerBoard[i]->IsDestroyed()) {
+            delete playerBoard[i]; // delete is the reverse of new, is used to free memory
+            playerBoard.erase(playerBoard.begin() + i);
+        }
+    }
+
+    for (int i = opponentBoard.size() - 1; i >= 0; i--) {
+        if (opponentBoard[i]->IsDestroyed()) {
+            delete opponentBoard[i];
+            opponentBoard.erase(opponentBoard.begin() + i);
+        }
+    }
+
+    UpdateRow(playerBoard, LOGIC_H / 2 - 90);
+    UpdateRow(opponentBoard, LOGIC_H / 2 + 90);
 }
 
 void Tema1::Init()
