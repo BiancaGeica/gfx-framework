@@ -42,8 +42,8 @@ void Tema1::ApplyEffects() {
         playerBoard[i]->ApplyTurnEffect(*player, *opponent);
     }
 
-    for (int i = 0; i < playerBoard.size(); i++) {
-        opponentBoard[i]->ApplyTurnEffect(*player, *opponent);
+    for (int i = 0; i < opponentBoard.size(); i++) {
+        opponentBoard[i]->ApplyTurnEffect(*opponent, *player);
     }
 }
 
@@ -275,6 +275,26 @@ void Tema1::Update(float deltaTimeSeconds)
             RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
         }
     }
+
+    srand(time(0));
+
+    // make the opponent put down cards with delay
+    if (opponentTurn) {
+        opponentDelay += deltaTimeSeconds;
+        if (opponentDelay > 1.0f) {
+            if (!opponentCards.empty()) { // could be 0, then rand would go kapoot
+                int random = rand() % opponentCards.size();
+                opponentBoard.push_back(opponentCards[random]);
+                opponentCards.erase(opponentCards.begin() + random);
+
+                UpdateRow(opponentCards, LOGIC_H - 100);
+                UpdateRow(opponentBoard, LOGIC_H / 2 + 90);
+            }
+
+            ApplyEffects(); // make the cards do things
+            opponentTurn = false;
+        }
+    }
 }
 
 
@@ -323,6 +343,8 @@ void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button press event
+    if (opponentTurn) return;
+
     // cout << "Pixel x = " << mouseX << " Pixel y = " << mouseY << "\n";
     glm::ivec2 resolution = window->GetResolution();
 
@@ -363,16 +385,8 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
             UpdateRow(playerCards, 100);
             UpdateRow(playerBoard, LOGIC_H / 2 - 90);
 
-            if (!opponentCards.empty()) { // could be 0, then rand would go kapoot
-                int random = rand() % opponentCards.size();
-                opponentBoard.push_back(opponentCards[random]);
-                opponentCards.erase(opponentCards.begin() + random);
-            }
-
-            UpdateRow(opponentCards, LOGIC_H - 100);
-            UpdateRow(opponentBoard, LOGIC_H / 2 + 90);
-
-            ApplyEffects(); // make the cards do things
+            opponentTurn = true;
+            opponentDelay = 0;
         }
         // cout << "on board\n";
     }

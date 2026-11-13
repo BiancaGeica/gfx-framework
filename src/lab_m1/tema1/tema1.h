@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <ctime> // for rand
 
 #include "components/simple_scene.h"
 #include "lab_m1/tema1/Card.h"
@@ -61,5 +62,9 @@ namespace m1
         // time to show the HP on the screen
         Player* player;
         Player* opponent;
+
+        // timer for opponent
+        bool opponentTurn = false;
+        float opponentDelay = 0;
     };
 }   // namespace m1
