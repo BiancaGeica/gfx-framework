@@ -56,6 +56,7 @@ namespace m1
         Card* selectedCard = nullptr; // nullptr means that I don't hold any card
 
         std::vector<Card*> playerBoard; // the cards that are on the board
+        std::vector<Card*> opponentBoard;
 
         // time to show the HP on the screen
         Player* player;

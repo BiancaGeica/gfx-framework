@@ -41,6 +41,10 @@ void Tema1::ApplyEffects() {
     for (int i = 0; i < playerBoard.size(); i++) {
         playerBoard[i]->ApplyTurnEffect(*player, *opponent);
     }
+
+    for (int i = 0; i < playerBoard.size(); i++) {
+        opponentBoard[i]->ApplyTurnEffect(*player, *opponent);
+    }
 }
 
 void Tema1::Init()
@@ -252,6 +256,25 @@ void Tema1::Update(float deltaTimeSeconds)
         modelMatrix *= transform2D::Translate(200 + (i % 5) * 14, LOGIC_H - 60 - 5 * 14 - (i / 5) * 14);
         RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.0f, 0.80f, 0.82f));
     }
+
+    // opponent cards that are on the board
+    for (int i = 0; i < opponentBoard.size(); i++) {
+        Card* card = opponentBoard[i];
+
+        card->UpdateAnimation(deltaTimeSeconds); // slide the cards on their place
+
+        glm::vec2 positionCurrentCard = card->GetPos();
+
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
+        RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
+
+        for (int i = 0; i < card->GetValue(); i++) {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 10 + i * 14, positionCurrentCard.y - Card::HEIGHT / 2 + 10); // 4 pixels to the right of the previous square
+            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+        }
+    }
 }
 
 
@@ -339,6 +362,16 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
             }
             UpdateRow(playerCards, 100);
             UpdateRow(playerBoard, LOGIC_H / 2 - 90);
+
+            if (!opponentCards.empty()) { // could be 0, then rand would go kapoot
+                int random = rand() % opponentCards.size();
+                opponentBoard.push_back(opponentCards[random]);
+                opponentCards.erase(opponentCards.begin() + random);
+            }
+
+            UpdateRow(opponentCards, LOGIC_H - 100);
+            UpdateRow(opponentBoard, LOGIC_H / 2 + 90);
+
             ApplyEffects(); // make the cards do things
         }
         // cout << "on board\n";
