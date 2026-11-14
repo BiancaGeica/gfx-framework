@@ -38,16 +38,15 @@ void Tema1::UpdateRow(std::vector<Card*>& row, float y) {
 }
 
 void Tema1::ApplyEffects() {
-    for (int priority = 0; priority < 8; priority++) {
-        for (int i = 0; i < player->GetBoard().size(); i++) {
-            if (player->GetBoard()[i]->GetPriority() == priority && !player->GetBoard()[i]->IsDestroyed()) {
-                player->GetBoard()[i]->ApplyTurnEffect(*player, *opponent);
+    for (int priority = 0; priority < 8; priority++) { // to cycle between priorities
+        for (int i = 0; i < player->GetBoard().size(); i++) { // cycle thru cards on the players board
+            if (player->GetBoard()[i]->GetPriority() == priority && !player->GetBoard()[i]->IsDestroyed() && !player->GetBoard()[i]->IsCancelled()) { // if the card is the one i'm searching rn
+                player->GetBoard()[i]->ApplyTurnEffect(*player, *opponent); // the card apply its effect
             }
-
         }
 
-        for (int i = 0; i < opponent->GetBoard().size(); i++) {
-            if (opponent->GetBoard()[i]->GetPriority() == priority && !opponent->GetBoard()[i]->IsDestroyed()) {
+        for (int i = 0; i < opponent->GetBoard().size(); i++) { // cycle thru cards on the opponents board
+            if (opponent->GetBoard()[i]->GetPriority() == priority && !opponent->GetBoard()[i]->IsDestroyed() && !opponent->GetBoard()[i]->IsCancelled()) {
                 opponent->GetBoard()[i]->ApplyTurnEffect(*opponent, *player);
             }
         }
@@ -55,10 +54,15 @@ void Tema1::ApplyEffects() {
 
     for (int i = 0; i < player->GetBoard().size(); i++) {
         player->GetBoard()[i]->AfterTurn(); // the permanent cards ignore it because of polymorphism (the base AfterTurn is empty)
+        player->GetBoard()[i]->SetCancelled(false); // without this, the card stays cancelled forever
     }
     for (int i = 0; i < opponent->GetBoard().size(); i++) {
         opponent->GetBoard()[i]->AfterTurn(); // lowers the value by 1 of the temporary cards
+        opponent->GetBoard()[i]->SetCancelled(false);
     }
+
+    player->SetLastCardPlayed(nullptr);
+    opponent->SetLastCardPlayed(nullptr);
 
     for (int i = player->GetBoard().size() - 1; i >= 0; i--) {
         if (player->GetBoard()[i]->IsDestroyed()) {
