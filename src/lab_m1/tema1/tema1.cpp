@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <iostream>
+#include <algorithm> // for swap
 
 #include "lab_m1/tema1/transform2D.h"
 #include "lab_m1/tema1/object2D.h"
@@ -96,6 +97,8 @@ void Tema1::Init()
     camera->Update();
     GetCameraInput()->SetActive(false);
 
+    srand(time(0)); // for random
+
     Mesh* card = object2D::CreateRectangle("card", Card::WIDTH, Card::HEIGHT, glm::vec3(1, 1, 1), true);
     AddMeshToList(card);
 
@@ -117,6 +120,11 @@ void Tema1::Init()
     playerDeck.push_back(new HealCard(2, Lane::Ranged));
     playerDeck.push_back(new FrostCard(2));
     playerDeck.push_back(new ScorchCard(3, Lane::Melee));
+    playerDeck.push_back(new DamageCard(2, Lane::Ranged));
+    playerDeck.push_back(new DamageCard(1, Lane::Siege));
+    playerDeck.push_back(new HealCard(3, Lane::Melee));
+    playerDeck.push_back(new ShieldCard(2, Lane::Ranged));
+    playerDeck.push_back(new ClearWeatherCard(1, Lane::Melee));
 
     // the cards that the opponent receives from the deck in the begining
     opponentDeck.push_back(new DamageCard(3, Lane::Melee));
@@ -124,6 +132,21 @@ void Tema1::Init()
     opponentDeck.push_back(new HealCard(2, Lane::Ranged));
     opponentDeck.push_back(new FrostCard(2));
     opponentDeck.push_back(new ScorchCard(3, Lane::Melee));
+    opponentDeck.push_back(new DamageCard(2, Lane::Ranged));
+    opponentDeck.push_back(new DamageCard(1, Lane::Siege));
+    opponentDeck.push_back(new HealCard(3, Lane::Melee));
+    opponentDeck.push_back(new ShieldCard(2, Lane::Ranged));
+    opponentDeck.push_back(new ClearWeatherCard(1, Lane::Melee));
+
+    for (int i = playerDeck.size() - 1; i > 0; i--) { // to shuffle the deck
+        int j = rand() % (i + 1);
+        std::swap(playerDeck[i], playerDeck[j]);
+    }
+
+    for (int i = opponentDeck.size() - 1; i > 0; i--) { // to shuffle the deck
+        int j = rand() % (i + 1);
+        std::swap(opponentDeck[i], opponentDeck[j]);
+    }
 
     for (int i = 0; i < playerDeck.size(); i++) {
         playerDeck[i]->SetPos(glm::vec2(LOGIC_W - 120 - 10, LOGIC_H / 2 - 90 - 10));
@@ -333,8 +356,6 @@ void Tema1::Update(float deltaTimeSeconds)
             RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
         }
     }
-
-    srand(time(0));
 
     // make the opponent put down cards with delay
     if (opponentTurn) {
