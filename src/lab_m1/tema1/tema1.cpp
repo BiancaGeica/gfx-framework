@@ -315,26 +315,26 @@ void Tema1::Update(float deltaTimeSeconds)
     // draw the HP for both players
     for (int i = 0; i < player->GetHp(); i++) {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(200 + (i % 5) * 14, 60 + (i / 5) * 14);
+        modelMatrix *= transform2D::Translate(30 + (i % 5) * 14, 60 + (i / 5) * 14);
         RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.18f, 0.54f, 0.34f));
     }
 
     for (int i = 0; i < opponent->GetHp(); i++) {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(200 + (i % 5) * 14, LOGIC_H - 60 - (i / 5) * 14);
+        modelMatrix *= transform2D::Translate(30 + (i % 5) * 14, LOGIC_H - 60 - (i / 5) * 14);
         RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.18f, 0.54f, 0.34f));
     }
 
     // draw shield points for both players
     for (int i = 0; i < player->GetShield(); i++) {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(200 + (i % 5) * 14, 60 + 5 * 14 + (i / 5) * 14);
+        modelMatrix *= transform2D::Translate(30 + (i % 5) * 14, 60 + 5 * 14 + (i / 5) * 14);
         RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.0f, 0.80f, 0.82f));
     }
 
     for (int i = 0; i < opponent->GetShield(); i++) {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(200 + (i % 5) * 14, LOGIC_H - 60 - 5 * 14 - (i / 5) * 14);
+        modelMatrix *= transform2D::Translate(30 + (i % 5) * 14, LOGIC_H - 60 - 5 * 14 - (i / 5) * 14);
         RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.0f, 0.80f, 0.82f));
     }
 
