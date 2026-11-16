@@ -158,6 +158,12 @@ void Tema1::Init()
 
     player = new Player(20);
     opponent = new Player(20);
+
+    // triangle for temporary cards
+    AddMeshToList(object2D::CreateTriangle("symbol_triangle", 28, glm::vec3(0, 0, 0), true));
+
+    // square for permanent cards
+    AddMeshToList(object2D::CreateRectangle("symbol_square", 24, 24, glm::vec3(0, 0, 0), true));
 }
 
 
@@ -209,6 +215,7 @@ void Tema1::Update(float deltaTimeSeconds)
     modelMatrix = transform2D::Translate(LOGIC_W - 120, LOGIC_H / 2 - 90);
     RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.2f, 0.2f, 0.3f));
 
+
     modelMatrix = glm::mat3(1);
     modelMatrix = transform2D::Translate(LOGIC_W - 120 - 5, LOGIC_H / 2 - 90 - 5);
     RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.54f, 0.17f, 0.88f));
@@ -242,6 +249,12 @@ void Tema1::Update(float deltaTimeSeconds)
         modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
         RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
 
+        // render the symbol: triangle for temporary card and square for permanent
+        if (card->IsTemporary())
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0, 0, 0));
+        else
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
+
         for (int i = 0; i < card->GetValue(); i++) {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 10 + i * 14, positionCurrentCard.y - Card::HEIGHT / 2 + 10); // 4 pixels to the right of the previous square
@@ -264,6 +277,12 @@ void Tema1::Update(float deltaTimeSeconds)
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
         RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
+
+        // render the symbol: triangle for temporary card and square for permanent
+        if (card->IsTemporary())
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0, 0, 0));
+        else
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
 
         for (int i = 0; i < card->GetValue(); i++) {
             modelMatrix = glm::mat3(1);
@@ -304,6 +323,12 @@ void Tema1::Update(float deltaTimeSeconds)
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
         RenderMesh2D(meshes["card"], modelMatrix, selectedCard->GetColor());
+
+        // render the symbol: triangle for temporary card and square for permanent
+        if (selectedCard->IsTemporary())
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0, 0, 0));
+        else
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
 
         for (int i = 0; i < selectedCard->GetValue(); i++) {
             modelMatrix = glm::mat3(1);
@@ -349,6 +374,12 @@ void Tema1::Update(float deltaTimeSeconds)
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
         RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
+
+        // render the symbol: triangle for temporary card and square for permanent
+        if (card->IsTemporary())
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0, 0, 0));
+        else
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
 
         for (int i = 0; i < card->GetValue(); i++) {
             modelMatrix = glm::mat3(1);
