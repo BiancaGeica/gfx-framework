@@ -373,6 +373,26 @@ void Tema1::Update(float deltaTimeSeconds)
 
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
+
+        // for the animation itself, (like that pirouette), the card shrink horizontally, change its face and goes back to normal
+        float scaleX = 1;
+        bool showFace = card->IsFaceUp();
+
+        if (card == flippingCard) { // this card is turning over right now
+            float t = (flipTimer - 0.5f) / 0.3f; // starts after 0.5s, lasts 0.3s
+            t = glm::clamp(t, 0.0f, 1.0f);       // stays 0 while flying, 1 at the end
+            scaleX = abs(1 - 2 * t);                         // the shrink then expanding back
+            showFace = t >= 0.5f;                            // the moment when the face appears
+        }
+
+        modelMatrix *= transform2D::Scale(scaleX, 1);
+
+        //if (!card->IsFaceUp()) { // face down: only the back of the card
+        if (!showFace) {
+            RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.55f, 0.0f, 0.55f));
+            continue;
+        }
+
         RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
 
         // render the symbol: triangle for temporary card and square for permanent
@@ -381,15 +401,20 @@ void Tema1::Update(float deltaTimeSeconds)
         else
             RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
 
+        if (card == flippingCard) {
+            continue; // the squares don't shrink with the card, so they should stay hided durring the flip
+        }
+
         for (int i = 0; i < card->GetValue(); i++) {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 10 + i * 14, positionCurrentCard.y - Card::HEIGHT / 2 + 10); // 4 pixels to the right of the previous square
+            
             RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
         }
     }
 
     // make the opponent put down cards with delay
-    if (opponentTurn) {
+    if (opponentTurn && flippingCard == nullptr) {
         opponentDelay += deltaTimeSeconds;
         if (opponentDelay > 1.0f) {
             if (!opponentCards.empty()) { // could be 0, then rand would go kapoot
@@ -397,12 +422,27 @@ void Tema1::Update(float deltaTimeSeconds)
                 opponent->GetBoard().push_back(opponentCards[random]);
                 opponent->SetLastCardPlayed(opponentCards[random]); // for Scorch, it saves the last played card
 
+                flippingCard = opponentCards[random]; // for the turning effect when arriving on the table
+                flipTimer = 0;
+
                 opponentCards.erase(opponentCards.begin() + random);
 
                 UpdateRow(opponentCards, LOGIC_H - 100);
                 UpdateRow(opponent->GetBoard(), LOGIC_H / 2 + 90);
             }
+            else { // because there are no other cards left there is nothing left to flip and the turn should end
+                ApplyEffects();
+                opponentTurn = false;
+            }
 
+        }
+    }
+
+    if (flippingCard != nullptr) {
+        flipTimer += deltaTimeSeconds;
+        if (flipTimer > 0.8f) {
+            flippingCard->SetFaceUp(true);
+            flippingCard = nullptr;
             ApplyEffects(); // make the cards do things
             opponentTurn = false;
         }

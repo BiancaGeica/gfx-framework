@@ -65,5 +65,9 @@ namespace m1
         float opponentDelay = 0;
 
         bool gameOver = false;
+
+        // flip animation for the opponent cards
+        Card* flippingCard = nullptr; // the card that needs to flip
+        float flipTimer = 0;
     };
 }   // namespace m1
