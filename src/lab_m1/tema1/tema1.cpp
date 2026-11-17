@@ -120,11 +120,11 @@ void Tema1::Init()
     playerDeck.push_back(new HealCard(2, Lane::Ranged));
     playerDeck.push_back(new FrostCard(2));
     playerDeck.push_back(new ScorchCard(3, Lane::Melee));
-    playerDeck.push_back(new DamageCard(2, Lane::Ranged));
     playerDeck.push_back(new DamageCard(1, Lane::Siege));
     playerDeck.push_back(new HealCard(3, Lane::Melee));
     playerDeck.push_back(new ShieldCard(2, Lane::Ranged));
     playerDeck.push_back(new ClearWeatherCard(1, Lane::Melee));
+    playerDeck.push_back(new WarHornCard(1, Lane::Melee));
 
     // the cards that the opponent receives from the deck in the begining
     opponentDeck.push_back(new DamageCard(3, Lane::Melee));
@@ -132,11 +132,11 @@ void Tema1::Init()
     opponentDeck.push_back(new HealCard(2, Lane::Ranged));
     opponentDeck.push_back(new FrostCard(2));
     opponentDeck.push_back(new ScorchCard(3, Lane::Melee));
-    opponentDeck.push_back(new DamageCard(2, Lane::Ranged));
     opponentDeck.push_back(new DamageCard(1, Lane::Siege));
     opponentDeck.push_back(new HealCard(3, Lane::Melee));
     opponentDeck.push_back(new ShieldCard(2, Lane::Ranged));
     opponentDeck.push_back(new ClearWeatherCard(1, Lane::Melee));
+    opponentDeck.push_back(new WarHornCard(1, Lane::Melee));
 
     for (int i = playerDeck.size() - 1; i > 0; i--) { // to shuffle the deck
         int j = rand() % (i + 1);
@@ -422,6 +422,11 @@ void Tema1::Update(float deltaTimeSeconds)
                 opponent->GetBoard().push_back(opponentCards[random]);
                 opponent->SetLastCardPlayed(opponentCards[random]); // for Scorch, it saves the last played card
 
+                if (opponent->GetDoubleNextCard()) {
+                    opponentCards[random]->ModifyValue(opponentCards[random]->GetValue());
+                    opponent->SetDoubleNextCard(false);
+                }
+
                 flippingCard = opponentCards[random]; // for the turning effect when arriving on the table
                 flipTimer = 0;
 
@@ -535,6 +540,12 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
                     playerCards.erase(playerCards.begin() + i); // can't use pop_back() bc the choosen card isn't necessary the last one from hand
                     player->GetBoard().push_back(selectedCard); // add the card to the board
                     player->SetLastCardPlayed(selectedCard);
+
+                    // when war horn is on the board, the next card should double its value
+                    if (player->GetDoubleNextCard()) {
+                        selectedCard->ModifyValue(selectedCard->GetValue());
+                        player->SetDoubleNextCard(false); // after the card gets doubled I should mark that
+                    }
                     
                     break;
                 }

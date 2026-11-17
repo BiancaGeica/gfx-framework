@@ -11,17 +11,20 @@ public:
 	void TakeDamage(int amount);
 	void Heal(int amount);
 	void AddShield(int amount);
+
 	// getters
 	int GetHp() const;
 	int GetMaxHp() const;
 	int GetShield() const;
 	bool IsDone() const;
+	bool GetDoubleNextCard() const;
 
 	std::vector<Card*>& GetBoard(); //& for the real vector, not just a copy
 	Card* GetLastCardPlayed() const;
 
-	// setter
+	// setters
 	void SetLastCardPlayed(Card* card);
+	void SetDoubleNextCard(bool something);
 
 protected:
 	int hp;
@@ -30,5 +33,8 @@ protected:
 
 	std::vector<Card*> board;
 	Card* lastCardPlayed = nullptr;
+
+	// for War horn
+	bool doubleNextCard = false;
 };
 

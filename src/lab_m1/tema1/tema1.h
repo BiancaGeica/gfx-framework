@@ -12,6 +12,7 @@
 #include "lab_m1/tema1/FrostCard.h"
 #include "lab_m1/tema1/ClearWeatherCard.h"
 #include "lab_m1/tema1/Player.h"
+#include "lab_m1/tema1/WarHornCard.h"
 
 namespace m1
 {

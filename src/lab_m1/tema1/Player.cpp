@@ -48,6 +48,16 @@ Card* Player::GetLastCardPlayed() const {
 	return lastCardPlayed;
 }
 
+bool Player::GetDoubleNextCard() const {
+	return doubleNextCard;
+}
+
+//setters
+
 void Player::SetLastCardPlayed(Card* card) {
 	lastCardPlayed = card;
+}
+
+void Player::SetDoubleNextCard(bool something) {
+	doubleNextCard = something;
 }
