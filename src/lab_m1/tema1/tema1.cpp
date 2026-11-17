@@ -105,10 +105,50 @@ void Tema1::ApplyEffects() {
     UpdateRow(player->GetHand(), 100);
     UpdateRow(opponent->GetHand(), LOGIC_H - 100);
 
+    // the round ends when someone reaches 0 HP or nobody has cards left
     if (player->IsDone() || opponent->IsDone() ||
         (player->GetHand().empty() && opponent->GetHand().empty())) {
-        gameOver = true;
+
+        // the one with less HP loses a crystal; on equal HP both lose one
+        if (player->GetHp() <= opponent->GetHp()) {
+            player->LoseCrystal();
+        }
+        if (opponent->GetHp() <= player->GetHp()) {
+            opponent->LoseCrystal();
+        }
+
+        if (player->GetCrystals() == 0 || opponent->GetCrystals() == 0) {
+            gameOver = true;
+        }
+        else {
+            GoToNextRound();
+        }
     }
+}
+
+
+void Tema1::GoToNextRound() {
+    // clean the board at the end
+    for (int i = 0; i < player->GetBoard().size(); i++) {
+        delete player->GetBoard()[i];
+    }
+    player->GetBoard().clear();
+
+    for (int i = 0; i < opponent->GetBoard().size(); i++) {
+        delete opponent->GetBoard()[i];
+    }
+    opponent->GetBoard().clear();
+
+    // reset the cards
+    player->SetLastCardPlayed(nullptr);
+    opponent->SetLastCardPlayed(nullptr);
+
+    // reset HP
+    player->ResetHp();
+    opponent->ResetHp();
+
+    // one more card for each player, dealt with the same animation
+    maxCards++;
 }
 
 void Tema1::Init()
@@ -192,6 +232,8 @@ void Tema1::Init()
 
     // square for permanent cards
     AddMeshToList(object2D::CreateRectangle("symbol_square", 24, 24, glm::vec3(0, 0, 0), true));
+
+    AddMeshToList(object2D::CreateRectangle("crystal", 14, 14, glm::vec3(0.6f, 0.9f, 1.0f), true));
 }
 
 
@@ -215,11 +257,11 @@ void Tema1::Update(float deltaTimeSeconds)
     glm::vec3 opponentBoardColor = glm::vec3(0.3f, 0.1f, 0.1f);
 
     if (gameOver) {
-        if (player->GetHp() == opponent->GetHp()) { // draw
+        if (player->GetCrystals() == opponent->GetCrystals()) { // draw
             playerBoardColor = glm::vec3(1, 1, 0);
             opponentBoardColor = glm::vec3(1, 1, 0);
         }
-        else if (player->GetHp() > opponent->GetHp()) { // player won
+        else if (player->GetCrystals() > opponent->GetCrystals()) { // player won
             playerBoardColor = glm::vec3(0, 1, 0);
             opponentBoardColor = glm::vec3(1, 0, 0);
         }
@@ -332,7 +374,7 @@ void Tema1::Update(float deltaTimeSeconds)
 
     // cards flying out of deck animation
     timeSincePreviousCard += deltaTimeSeconds;
-    if (timeSincePreviousCard > 0.4f && usedCards < 10) { // can't decide between 0.3 and 0.4 //COME BACK LATERRR
+    if (timeSincePreviousCard > 0.4f && usedCards < maxCards) { // can't decide between 0.3 and 0.4 //COME BACK LATERRR
         usedCards++;
         timeSincePreviousCard = 0;
         player->GetHand().push_back(playerDeck.back()); // takes the card that is on top
@@ -392,6 +434,20 @@ void Tema1::Update(float deltaTimeSeconds)
         RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.0f, 0.80f, 0.82f));
     }
 
+    for (int i = 0; i < player->GetCrystals(); i++) {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(30 + i * 20, 30);
+        modelMatrix *= transform2D::Rotate(glm::radians(45.0f)); // 45 degrees to look like diamonds
+        RenderMesh2D(meshes["crystal"], modelMatrix, glm::vec3(0.6f, 0.9f, 1.0f));
+    }
+
+    for (int i = 0; i < opponent->GetCrystals(); i++) {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(30 + i * 20, LOGIC_H - 30);
+        modelMatrix *= transform2D::Rotate(glm::radians(45.0f));
+        RenderMesh2D(meshes["crystal"], modelMatrix, glm::vec3(0.6f, 0.9f, 1.0f));
+    }
+
     // opponent cards that are on the board
     for (int i = 0; i < opponent->GetBoard().size(); i++) {
         Card* card = opponent->GetBoard()[i];
@@ -443,7 +499,7 @@ void Tema1::Update(float deltaTimeSeconds)
     }
 
     // if there are no cards left in the player hand, but the opponent still has cards, skip the player
-    if (!opponentTurn && !gameOver && usedCards == 10 && player->GetHand().empty()) {
+    if (!opponentTurn && !gameOver && usedCards == maxCards && player->GetHand().empty()) {
         opponentTurn = true;
         opponentDelay = 0;
     }

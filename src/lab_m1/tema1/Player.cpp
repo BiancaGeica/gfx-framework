@@ -23,6 +23,15 @@ void Player::AddShield(int amount) {
 	shield += amount;
 }
 
+void Player::LoseCrystal() {
+	crystals--;
+}
+
+void Player::ResetHp() {
+	hp = maxHp;
+	shield = 0;
+}
+
 // getters
 int Player::GetHp() const {
 	return hp;
@@ -54,6 +63,10 @@ bool Player::GetDoubleNextCard() const {
 
 std::vector<Card*>& Player::GetHand() {
 	return hand;
+}
+
+int Player::GetCrystals() const {
+	return crystals;
 }
 
 //setters

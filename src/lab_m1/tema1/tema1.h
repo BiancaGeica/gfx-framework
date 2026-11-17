@@ -46,6 +46,8 @@ namespace m1
         void ApplyEffects();
 
         Card* AddRandomCard();
+
+        void GoToNextRound();
  
      protected:
         glm::mat3 modelMatrix;
@@ -78,5 +80,6 @@ namespace m1
 
         // total cards (bc I have 12 cards and only 10 in hand, I need to count how many are used)
         int usedCards = 0;
+        int maxCards = 10;
     };
 }   // namespace m1

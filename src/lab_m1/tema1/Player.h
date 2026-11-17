@@ -11,6 +11,8 @@ public:
 	void TakeDamage(int amount);
 	void Heal(int amount);
 	void AddShield(int amount);
+	void LoseCrystal();
+	void ResetHp();
 
 	// getters
 	int GetHp() const;
@@ -23,6 +25,8 @@ public:
 	Card* GetLastCardPlayed() const;
 
 	std::vector<Card*>& GetHand();
+
+	int GetCrystals() const;
 
 	// setters
 	void SetLastCardPlayed(Card* card);
@@ -42,5 +46,7 @@ protected:
 	// for spy
 	std::vector<Card*> hand; // players hand to know where to go
 
+	// for rounds
+	int crystals = 2;
 };
 
