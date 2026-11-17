@@ -81,9 +81,11 @@ void Tema1::ApplyEffects() {
 
     UpdateRow(player->GetBoard(), LOGIC_H / 2 - 90);
     UpdateRow(opponent->GetBoard(), LOGIC_H / 2 + 90);
+    UpdateRow(player->GetHand(), 100);
+    UpdateRow(opponent->GetHand(), LOGIC_H - 100);
 
     if (player->IsDone() || opponent->IsDone() ||
-        (playerCards.empty() && opponentCards.empty())) {
+        (player->GetHand().empty() && opponent->GetHand().empty())) {
         gameOver = true;
     }
 }
@@ -116,7 +118,7 @@ void Tema1::Init()
 
     // the cards that the player receives from the deck in the begining
     playerDeck.push_back(new DamageCard(3, Lane::Melee));
-    playerDeck.push_back(new ShieldCard(4, Lane::Siege));
+    playerDeck.push_back(new SpyCard(1, Lane::Melee));
     playerDeck.push_back(new HealCard(2, Lane::Ranged));
     playerDeck.push_back(new FrostCard(2));
     playerDeck.push_back(new ScorchCard(3, Lane::Melee));
@@ -128,7 +130,7 @@ void Tema1::Init()
 
     // the cards that the opponent receives from the deck in the begining
     opponentDeck.push_back(new DamageCard(3, Lane::Melee));
-    opponentDeck.push_back(new ShieldCard(4, Lane::Siege));
+    opponentDeck.push_back(new SpyCard(1, Lane::Melee));
     opponentDeck.push_back(new HealCard(2, Lane::Ranged));
     opponentDeck.push_back(new FrostCard(2));
     opponentDeck.push_back(new ScorchCard(3, Lane::Melee));
@@ -263,8 +265,8 @@ void Tema1::Update(float deltaTimeSeconds)
     }
 
     // players cards
-    for (int i = 0; i < playerCards.size(); i++) {
-        Card* card = playerCards[i];
+    for (int i = 0; i < player->GetHand().size(); i++) {
+        Card* card = player->GetHand()[i];
 
         if (card == selectedCard) {
             continue; // this warning is a drama queen because it could never be NULL
@@ -292,8 +294,8 @@ void Tema1::Update(float deltaTimeSeconds)
     }
 
     // opponents cards
-    for (int i = 0; i < opponentCards.size(); i++) {
-        Card* card = opponentCards[i];
+    for (int i = 0; i < opponent->GetHand().size(); i++) {
+        Card* card = opponent->GetHand()[i];
         card->UpdateAnimation(deltaTimeSeconds); // slide the cards on their place
         glm::vec2 positionCurrentCard = card->GetPos();
 
@@ -306,14 +308,14 @@ void Tema1::Update(float deltaTimeSeconds)
     timeSincePreviousCard += deltaTimeSeconds;
     if (timeSincePreviousCard > 0.4f && !playerDeck.empty() && !opponentDeck.empty()) { // can't decide between 0.3 and 0.4 //COME BACK LATERRR
         timeSincePreviousCard = 0;
-        playerCards.push_back(playerDeck.back()); // takes the card that is on top
+        player->GetHand().push_back(playerDeck.back()); // takes the card that is on top
         playerDeck.pop_back(); // removes the card from the deck
 
-        opponentCards.push_back(opponentDeck.back());
+        opponent->GetHand().push_back(opponentDeck.back());
         opponentDeck.pop_back();
 
-        UpdateRow(playerCards, 100);
-        UpdateRow(opponentCards, LOGIC_H - 100);
+        UpdateRow(player->GetHand(), 100);
+        UpdateRow(opponent->GetHand(), LOGIC_H - 100);
     }
 
     // draw the selected card because it went under other things when being hoovered over the screen and that's not cute
@@ -413,26 +415,32 @@ void Tema1::Update(float deltaTimeSeconds)
         }
     }
 
+    // if there are no cards left in the player hand, but the opponent still has cards, skip the player
+    if (!opponentTurn && !gameOver && playerDeck.empty() && player->GetHand().empty()) {
+        opponentTurn = true;
+        opponentDelay = 0;
+    }
+
     // make the opponent put down cards with delay
     if (opponentTurn && flippingCard == nullptr) {
         opponentDelay += deltaTimeSeconds;
         if (opponentDelay > 1.0f) {
-            if (!opponentCards.empty()) { // could be 0, then rand would go kapoot
-                int random = rand() % opponentCards.size();
-                opponent->GetBoard().push_back(opponentCards[random]);
-                opponent->SetLastCardPlayed(opponentCards[random]); // for Scorch, it saves the last played card
+            if (!opponent->GetHand().empty()) { // could be 0, then rand would go kapoot
+                int random = rand() % opponent->GetHand().size();
+                opponent->GetBoard().push_back(opponent->GetHand()[random]);
+                opponent->SetLastCardPlayed(opponent->GetHand()[random]); // for Scorch, it saves the last played card
 
                 if (opponent->GetDoubleNextCard()) {
-                    opponentCards[random]->ModifyValue(opponentCards[random]->GetValue());
+                    opponent->GetHand()[random]->ModifyValue(opponent->GetHand()[random]->GetValue());
                     opponent->SetDoubleNextCard(false);
                 }
 
-                flippingCard = opponentCards[random]; // for the turning effect when arriving on the table
+                flippingCard = opponent->GetHand()[random]; // for the turning effect when arriving on the table
                 flipTimer = 0;
 
-                opponentCards.erase(opponentCards.begin() + random);
+                opponent->GetHand().erase(opponent->GetHand().begin() + random);
 
-                UpdateRow(opponentCards, LOGIC_H - 100);
+                UpdateRow(opponent->GetHand(), LOGIC_H - 100);
                 UpdateRow(opponent->GetBoard(), LOGIC_H / 2 + 90);
             }
             else { // because there are no other cards left there is nothing left to flip and the turn should end
@@ -515,9 +523,9 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
     // cout << "Logical x = " << x << " Logical y = " << y << "\n";
 
     // logic when a card is selected
-    for (int i = 0; i < playerCards.size(); i++) {
-        if (playerCards[i]->IsMouseOver(x, y)) {
-            selectedCard = playerCards[i];
+    for (int i = 0; i < player->GetHand().size(); i++) {
+        if (player->GetHand()[i]->IsMouseOver(x, y)) {
+            selectedCard = player->GetHand()[i];
             // cout << "picked " << selectedCard->GetPos().x << "\n";
         }
     }
@@ -535,9 +543,9 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
     if (x >= (LOGIC_W / 2) - 70 - (900 / 2) && x <= (LOGIC_W / 2) - 70 + (900 / 2) && // the board is 900×180
         y >= (LOGIC_H / 2) - 90 - (180 / 2) && y <= (LOGIC_H / 2) - 90 + (180 / 2)) {
         if (selectedCard != nullptr) {
-            for (int i = 0; i < playerCards.size(); i++) {
-                if (playerCards[i] == selectedCard) {
-                    playerCards.erase(playerCards.begin() + i); // can't use pop_back() bc the choosen card isn't necessary the last one from hand
+            for (int i = 0; i < player->GetHand().size(); i++) {
+                if (player->GetHand()[i] == selectedCard) {
+                    player->GetHand().erase(player->GetHand().begin() + i); // can't use pop_back() bc the choosen card isn't necessary the last one from hand
                     player->GetBoard().push_back(selectedCard); // add the card to the board
                     player->SetLastCardPlayed(selectedCard);
 
@@ -550,7 +558,7 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
                     break;
                 }
             }
-            UpdateRow(playerCards, 100);
+            UpdateRow(player->GetHand(), 100);
             UpdateRow(player->GetBoard(), LOGIC_H / 2 - 90);
 
             opponentTurn = true;

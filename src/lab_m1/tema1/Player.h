@@ -22,6 +22,8 @@ public:
 	std::vector<Card*>& GetBoard(); //& for the real vector, not just a copy
 	Card* GetLastCardPlayed() const;
 
+	std::vector<Card*>& GetHand();
+
 	// setters
 	void SetLastCardPlayed(Card* card);
 	void SetDoubleNextCard(bool something);
@@ -36,5 +38,9 @@ protected:
 
 	// for War horn
 	bool doubleNextCard = false;
+
+	// for spy
+	std::vector<Card*> hand; // players hand to know where to go
+
 };
 

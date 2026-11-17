@@ -52,6 +52,10 @@ bool Player::GetDoubleNextCard() const {
 	return doubleNextCard;
 }
 
+std::vector<Card*>& Player::GetHand() {
+	return hand;
+}
+
 //setters
 
 void Player::SetLastCardPlayed(Card* card) {

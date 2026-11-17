@@ -13,6 +13,7 @@
 #include "lab_m1/tema1/ClearWeatherCard.h"
 #include "lab_m1/tema1/Player.h"
 #include "lab_m1/tema1/WarHornCard.h"
+#include "lab_m1/tema1/SpyCard.h"
 
 namespace m1
 {
@@ -47,8 +48,8 @@ namespace m1
         static constexpr float LOGIC_W = 1280.0f; // constexpr is fixed at compile time so I don't write it again in cpp
         static constexpr float LOGIC_H = 720.0f; // logic because it's not the real size of the screen
 
-        std::vector<Card*> playerCards;
-        std::vector<Card*> opponentCards;
+        //std::vector<Card*> playerCards; should delete them because while adding spy I realized that I need to have direct access to the hands
+        //std::vector<Card*> opponentCards; so that the card woldn't be drawn in the opponents hand after moving it to the player
 
         std::vector<Card*> playerDeck;
         std::vector<Card*> opponentDeck;
