@@ -16,6 +16,8 @@ int FrostCard::GetPriority() const {
 
 void FrostCard::ApplyTurnEffect(Player& owner, Player& opponent) {
 	for (int i = 0; i < opponent.GetBoard().size(); i++) {
-		opponent.GetBoard()[i]->ModifyValue(-1);
+		if (opponent.GetBoard()[i]->GetLane() == Lane::Melee) {
+			opponent.GetBoard()[i]->ModifyValue(-1);
+		}
 	}
 }

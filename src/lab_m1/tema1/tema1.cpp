@@ -26,6 +26,27 @@ Tema1::~Tema1()
 {
 }
 
+Card* Tema1::AddRandomCard() {
+    int value = 1 + rand() % 3; // cards hp
+    Lane lane = (Lane)(rand() % 3);// On witch lane is the temporary card: Melee, Ranged, Siege
+
+    switch (rand() % 13) {
+    case 0: case 1: case 2:
+        return new DamageCard(value, lane);
+    case 3: case 4:
+        return new HealCard(value, lane);
+    case 5:
+        return new ShieldCard(value, lane);
+    case 6:  return new FrostCard(value);
+    case 7:  return new FogCard(value);
+    case 8:  return new RainCard(value);
+    case 9:  return new ScorchCard(value, lane);
+    case 10: return new SpyCard(1, lane);
+    case 11: return new WarHornCard(1, lane);
+    default: return new ClearWeatherCard(1, lane);
+    }
+}
+
 void Tema1::UpdateRow(std::vector<Card*>& row, float y) {
     // define where every card should go
     int numberCardsHand = row.size();
@@ -117,7 +138,7 @@ void Tema1::Init()
     AddMeshToList(hpPlayer);
 
     // the cards that the player receives from the deck in the begining
-    playerDeck.push_back(new DamageCard(3, Lane::Melee));
+    /*playerDeck.push_back(new DamageCard(3, Lane::Melee));
     playerDeck.push_back(new SpyCard(1, Lane::Melee));
     playerDeck.push_back(new HealCard(2, Lane::Ranged));
     playerDeck.push_back(new FrostCard(2));
@@ -126,10 +147,15 @@ void Tema1::Init()
     playerDeck.push_back(new HealCard(3, Lane::Melee));
     playerDeck.push_back(new ShieldCard(2, Lane::Ranged));
     playerDeck.push_back(new ClearWeatherCard(1, Lane::Melee));
-    playerDeck.push_back(new WarHornCard(1, Lane::Melee));
+    playerDeck.push_back(new WarHornCard(1, Lane::Melee));*/
+
+    for (int i = 0; i < 12; i++) {
+        playerDeck.push_back(AddRandomCard());
+        opponentDeck.push_back(AddRandomCard());
+    }
 
     // the cards that the opponent receives from the deck in the begining
-    opponentDeck.push_back(new DamageCard(3, Lane::Melee));
+    /*opponentDeck.push_back(new DamageCard(3, Lane::Melee));
     opponentDeck.push_back(new SpyCard(1, Lane::Melee));
     opponentDeck.push_back(new HealCard(2, Lane::Ranged));
     opponentDeck.push_back(new FrostCard(2));
@@ -138,7 +164,7 @@ void Tema1::Init()
     opponentDeck.push_back(new HealCard(3, Lane::Melee));
     opponentDeck.push_back(new ShieldCard(2, Lane::Ranged));
     opponentDeck.push_back(new ClearWeatherCard(1, Lane::Melee));
-    opponentDeck.push_back(new WarHornCard(1, Lane::Melee));
+    opponentDeck.push_back(new WarHornCard(1, Lane::Melee));*/
 
     for (int i = playerDeck.size() - 1; i > 0; i--) { // to shuffle the deck
         int j = rand() % (i + 1);
@@ -306,7 +332,8 @@ void Tema1::Update(float deltaTimeSeconds)
 
     // cards flying out of deck animation
     timeSincePreviousCard += deltaTimeSeconds;
-    if (timeSincePreviousCard > 0.4f && !playerDeck.empty() && !opponentDeck.empty()) { // can't decide between 0.3 and 0.4 //COME BACK LATERRR
+    if (timeSincePreviousCard > 0.4f && usedCards < 10) { // can't decide between 0.3 and 0.4 //COME BACK LATERRR
+        usedCards++;
         timeSincePreviousCard = 0;
         player->GetHand().push_back(playerDeck.back()); // takes the card that is on top
         playerDeck.pop_back(); // removes the card from the deck
@@ -416,7 +443,7 @@ void Tema1::Update(float deltaTimeSeconds)
     }
 
     // if there are no cards left in the player hand, but the opponent still has cards, skip the player
-    if (!opponentTurn && !gameOver && playerDeck.empty() && player->GetHand().empty()) {
+    if (!opponentTurn && !gameOver && usedCards == 10 && player->GetHand().empty()) {
         opponentTurn = true;
         opponentDelay = 0;
     }

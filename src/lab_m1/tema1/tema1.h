@@ -14,6 +14,8 @@
 #include "lab_m1/tema1/Player.h"
 #include "lab_m1/tema1/WarHornCard.h"
 #include "lab_m1/tema1/SpyCard.h"
+#include "lab_m1/tema1/FogCard.h"
+#include "lab_m1/tema1/RainCard.h"
 
 namespace m1
 {
@@ -43,6 +45,8 @@ namespace m1
 
         void ApplyEffects();
 
+        Card* AddRandomCard();
+ 
      protected:
         glm::mat3 modelMatrix;
         static constexpr float LOGIC_W = 1280.0f; // constexpr is fixed at compile time so I don't write it again in cpp
@@ -71,5 +75,8 @@ namespace m1
         // flip animation for the opponent cards
         Card* flippingCard = nullptr; // the card that needs to flip
         float flipTimer = 0;
+
+        // total cards (bc I have 12 cards and only 10 in hand, I need to count how many are used)
+        int usedCards = 0;
     };
 }   // namespace m1
