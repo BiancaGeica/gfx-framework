@@ -151,6 +151,11 @@ void Tema1::GoToNextRound() {
     maxCards++;
 }
 
+float Tema1::TextWidth(std::string text, float scale) {
+    // every letter is equally wide (~29 px for size 48)
+    return text.size() * 29.0f * scale;
+}
+
 void Tema1::Init()
 {
     auto camera = GetSceneCamera();
@@ -159,6 +164,12 @@ void Tema1::Init()
     camera->SetRotation(glm::vec3(0, 0, 0));
     camera->Update();
     GetCameraInput()->SetActive(false);
+    
+    // for the welcome screen
+    textRenderer = new gfxc::TextRenderer(window->props.selfDir, LOGIC_W, LOGIC_H); // window->props.selfDir = where the program is
+    textRenderer->Load(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::FONTS, "Hack-Bold.ttf"), 48);
+
+    AddMeshToList(object2D::CreateRectangle("button", 240, 80, glm::vec3(1, 1, 1), true));
 
     srand(time(0)); // for random
 
@@ -247,12 +258,28 @@ void Tema1::FrameStart()
     // Sets the screen area where to draw
     glViewport(0, 0, resolution.x, resolution.y);
 
-    glDepthFunc(GL_LEQUAL); // without this my cards dissapear behind the board of each player
+    //glDepthFunc(GL_LEQUAL); // without this my cards dissapear behind the board of each player
+    glDisable(GL_DEPTH_TEST); // I CANT WRITE START OVER MY BUTTON WITHOUT THIS SOMEHOW
 }
 
 
 void Tema1::Update(float deltaTimeSeconds)
 {
+    // welcome screen
+    if (state == GameState::WelcomeScreen) {
+        textRenderer->RenderText("WELCOME TO GWENT!", LOGIC_W / 2 - TextWidth("WELCOME TO GWENT!", 1.0f) / 2, 250, 1.0f, glm::vec3(0.3f, 0.8f, 0.5f));
+        textRenderer->RenderText("THE", LOGIC_W / 2 - TextWidth("THE", 0.5f) / 2, 320, 0.5f, glm::vec3(0.85f, 0.65f, 0.2f));
+        textRenderer->RenderText("WITCHER CARD GAME", LOGIC_W / 2 - TextWidth("WITCHER CARD GAME", 0.5f) / 2, 350, 0.5f, glm::vec3(0.85f, 0.65f, 0.2f));
+
+        // button is centered at y = 260 from the bottom witch means 460 from the top
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(LOGIC_W / 2, 260);
+        RenderMesh2D(meshes["button"], modelMatrix, glm::vec3(0.2f, 0.5f, 0.3f));
+
+        textRenderer->RenderText("START", LOGIC_W / 2 - TextWidth("START", 0.8f) / 2, 446, 0.8f, glm::vec3(1, 1, 1));
+        return; // don't draw the game!!!!!!!!!!
+    }
+    
     glm::vec3 playerBoardColor = glm::vec3(0.1f, 0.1f, 0.3f); // used to change the color of the boards to show who won
     glm::vec3 opponentBoardColor = glm::vec3(0.3f, 0.1f, 0.1f);
 
@@ -590,6 +617,19 @@ void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
+    //welcome screen
+    if (state == GameState::WelcomeScreen) {
+        glm::ivec2 resolution = window->GetResolution();
+        float x = mouseX * LOGIC_W / resolution.x;
+        float y = (resolution.y - mouseY) * LOGIC_H / resolution.y;
+
+        // the button is 240 x 80, centered on the screen
+        if (x >= LOGIC_W / 2 - 120 && x <= LOGIC_W / 2 + 120 && y >= 260 - 40 && y <= 260 + 40) {
+            state = GameState::LeaderSelectScreen;
+        }
+        return;
+    }
+    
     // Add mouse button press event
     if (gameOver) {
         return;

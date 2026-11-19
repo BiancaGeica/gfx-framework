@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <ctime> // for rand
+#include "components/text_renderer.h"
 
 #include "components/simple_scene.h"
 #include "lab_m1/tema1/Card.h"
@@ -16,6 +17,8 @@
 #include "lab_m1/tema1/SpyCard.h"
 #include "lab_m1/tema1/FogCard.h"
 #include "lab_m1/tema1/RainCard.h"
+
+enum class GameState { WelcomeScreen, LeaderSelectScreen, GameScreen, OverviewScreen }; // the screens of the game
 
 namespace m1
 {
@@ -77,6 +80,10 @@ namespace m1
         // flip animation for the opponent cards
         Card* flippingCard = nullptr; // the card that needs to flip
         float flipTimer = 0;
+
+        GameState state = GameState::WelcomeScreen; // screen to start the game so the cards don't start to fly before the player is ready
+        gfxc::TextRenderer* textRenderer;
+        float TextWidth(std::string text, float scale);
 
         // total cards (bc I have 12 cards and only 10 in hand, I need to count how many are used)
         int usedCards = 0;
