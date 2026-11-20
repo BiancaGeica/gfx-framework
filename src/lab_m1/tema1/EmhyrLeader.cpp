@@ -22,6 +22,7 @@ void EmhyrLeader::UseAbility(Player& owner, Player& opponent) {
 		Card* card = hand[rand() % hand.size()];
 		if (!card->IsFaceUp()) {
 			card->SetFaceUp(true);
+			card->StartFlip(revealed * 0.2f); // the flip of the opponent cards
 			revealed++;
 		}
 	}

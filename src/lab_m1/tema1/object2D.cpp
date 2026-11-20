@@ -54,3 +54,30 @@ Mesh* object2D::CreateTriangle(const std::string& name, float size, glm::vec3 co
     triangle->InitFromData(vertices, indices);
     return triangle;
 }
+
+
+Mesh* object2D::CreatePolygon(const std::string& name, float radius, int sides, glm::vec3 color)
+{
+    std::vector<VertexFormat> vertices;
+    std::vector<unsigned int> indices;
+
+    // vertex 0 is the center
+    vertices.push_back(VertexFormat(glm::vec3(0, 0, 0), color));
+
+    // the points on the circle, at equal angles
+    for (int i = 0; i < sides; i++) {
+        float angle = 2 * glm::pi<float>() * i / sides;
+        vertices.push_back(VertexFormat(glm::vec3(radius * cos(angle), radius * sin(angle), 0), color));
+    }
+
+    // one triangle per side: center, current point, next point
+    for (int i = 1; i <= sides; i++) {
+        indices.push_back(0);
+        indices.push_back(i);
+        indices.push_back(i % sides + 1); // the last triangle goes back to point 1
+    }
+
+    Mesh* polygon = new Mesh(name);
+    polygon->InitFromData(vertices, indices);
+    return polygon;
+}

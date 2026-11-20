@@ -46,6 +46,10 @@ void Card::UpdateAnimation(float deltaTime) {
 	const float SPEED = 10.0f;
 	float t = glm::min(1.0f, SPEED * deltaTime); // t = the % of the distance to the target on each frame, ADDED MIN BECAUSE SOMETIMES IT GOES SOMEWHERE RANDOM
 	pos += (targetPos - pos) * t; // targetPos - pos = distance left to the tsrget
+
+	// for emhyr action
+	// the flip advances from 0 to 1 in 0.3 seconds (negative = still waiting)
+	flipProgress = glm::min(1.0f, flipProgress + deltaTime / 0.3f);
 }
 
 void Card::ModifyValue(int delta) {
@@ -101,4 +105,12 @@ void Card::SetFaceUp(bool up) {
 
 void Card::SetCancelled(bool c) {
 	cancelled = c;
+}
+
+void Card::StartFlip(float delay) {
+	flipProgress = -delay / 0.3f;
+}
+
+float Card::GetFlipProgress() const {
+	return flipProgress;
 }

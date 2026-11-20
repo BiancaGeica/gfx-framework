@@ -17,6 +17,10 @@
 #include "lab_m1/tema1/SpyCard.h"
 #include "lab_m1/tema1/FogCard.h"
 #include "lab_m1/tema1/RainCard.h"
+#include "lab_m1/tema1/FoltestLeader.h"
+#include "lab_m1/tema1/EmhyrLeader.h"
+#include "lab_m1/tema1/EredinLeader.h"
+#include "lab_m1/tema1/FrancescaLeader.h"
 
 enum class GameState { WelcomeScreen, LeaderSelectScreen, GameScreen, OverviewScreen }; // the screens of the game
 
@@ -84,6 +88,12 @@ namespace m1
         GameState state = GameState::WelcomeScreen; // screen to start the game so the cards don't start to fly before the player is ready
         gfxc::TextRenderer* textRenderer;
         float TextWidth(std::string text, float scale);
+
+        // leaders
+        std::vector<Leader*> leaders;
+        int selectedLeader = -1; // flag to announce when nothing is selected
+        Leader* playerLeader = nullptr;
+        Leader* opponentLeader = nullptr;
 
         // total cards (bc I have 12 cards and only 10 in hand, I need to count how many are used)
         int usedCards = 0;

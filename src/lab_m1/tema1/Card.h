@@ -36,6 +36,9 @@ public:
 	// functions for all cards, DON'T OVERRIDE THEM or something
 	bool IsMouseOver(float x, float y) const;
 	void UpdateAnimation(float deltaTime);
+	// startFlip and GetFlipProgress are used for the card flip animation for those 3 cards for Emhyr
+	void StartFlip(float delay);
+	float GetFlipProgress() const;
 	void ModifyValue(int delta);
 	void ResetValue();
 	bool IsDestroyed() const;

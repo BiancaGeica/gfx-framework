@@ -171,6 +171,17 @@ void Tema1::Init()
 
     AddMeshToList(object2D::CreateRectangle("button", 240, 80, glm::vec3(1, 1, 1), true));
 
+    // the shapes of the leaders
+    AddMeshToList(object2D::CreatePolygon("leader_circle", 50, 40, glm::vec3(1, 1, 1))); // the color is just a placeholder
+    AddMeshToList(object2D::CreateTriangle("leader_triangle", 100, glm::vec3(1, 1, 1), true));
+    AddMeshToList(object2D::CreatePolygon("leader_hexagon", 50, 6, glm::vec3(1, 1, 1)));
+    AddMeshToList(object2D::CreatePolygon("leader_diamond", 50, 4, glm::vec3(1, 1, 1)));
+
+    leaders.push_back(new FoltestLeader());
+    leaders.push_back(new EmhyrLeader());
+    leaders.push_back(new EredinLeader());
+    leaders.push_back(new FrancescaLeader());
+
     srand(time(0)); // for random
 
     Mesh* card = object2D::CreateRectangle("card", Card::WIDTH, Card::HEIGHT, glm::vec3(1, 1, 1), true);
@@ -279,6 +290,39 @@ void Tema1::Update(float deltaTimeSeconds)
         textRenderer->RenderText("START", LOGIC_W / 2 - TextWidth("START", 0.8f) / 2, 446, 0.8f, glm::vec3(1, 1, 1));
         return; // don't draw the game!!!!!!!!!!
     }
+
+    // leader select screen
+    if (state == GameState::LeaderSelectScreen) {
+        textRenderer->RenderText("CHOOSE YOUR LEADER", LOGIC_W / 2 - TextWidth("CHOOSE YOUR LEADER", 1.0f) / 2, 150, 1.0f, glm::vec3(0.85f, 0.65f, 0.2f));
+
+        for (int i = 0; i < leaders.size(); i++) {
+            float x = LOGIC_W / 2 + (i - 1.5f) * 220;
+            std::string mesh = leaders[i]->GetMeshName();
+
+            if (i == selectedLeader) { // highlight
+                modelMatrix = glm::mat3(1);
+                modelMatrix *= transform2D::Translate(x, LOGIC_H / 2);
+                modelMatrix *= transform2D::Scale(1.15f, 1.15f);
+                RenderMesh2D(meshes[mesh], modelMatrix, glm::vec3(0.2f, 0.4f, 1.0f));
+            }
+
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(x, LOGIC_H / 2);
+            RenderMesh2D(meshes[mesh], modelMatrix, leaders[i]->GetColor());
+        }
+        return;
+    }
+
+    // the leaders on the in game screen
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(60, 270);
+    RenderMesh2D(meshes[playerLeader->GetMeshName()], modelMatrix,
+        playerLeader->IsUsed() ? glm::vec3(0.4f, 0.4f, 0.4f) : playerLeader->GetColor());
+
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(60, LOGIC_H - 270);
+    RenderMesh2D(meshes[opponentLeader->GetMeshName()], modelMatrix,
+        opponentLeader->IsUsed() ? glm::vec3(0.4f, 0.4f, 0.4f) : opponentLeader->GetColor());
     
     glm::vec3 playerBoardColor = glm::vec3(0.1f, 0.1f, 0.3f); // used to change the color of the boards to show who won
     glm::vec3 opponentBoardColor = glm::vec3(0.3f, 0.1f, 0.1f);
@@ -396,7 +440,39 @@ void Tema1::Update(float deltaTimeSeconds)
 
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
-        RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.55f, 0.0f, 0.55f));
+
+        float scaleX = 1;
+        bool showFace = card->IsFaceUp();
+
+        // to reveal the opponent cards when Emhyr is activated
+        if (card->IsFaceUp() && card->GetFlipProgress() < 1) {
+            float t = glm::max(0.0f, card->GetFlipProgress());
+            scaleX = abs(1 - 2 * t);
+            showFace = t >= 0.5f;
+        }
+
+        modelMatrix *= transform2D::Scale(scaleX, 1);
+
+        if (!showFace) { // hidden: only the back
+            RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.55f, 0.0f, 0.55f));
+            continue;
+        }
+
+        // revealed by Emhyr: show the card like the ones on the board
+        RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
+
+        if (card->IsTemporary())
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0, 0, 0));
+        else
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
+
+        if (card->GetFlipProgress() < 1) continue; // the squares don't shrink, so hide them while flipping
+
+        for (int j = 0; j < card->GetValue(); j++) {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 10 + j * 14, positionCurrentCard.y - Card::HEIGHT / 2 + 10);
+            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+        }
     }
 
     // cards flying out of deck animation
@@ -535,6 +611,11 @@ void Tema1::Update(float deltaTimeSeconds)
     if (opponentTurn && flippingCard == nullptr) {
         opponentDelay += deltaTimeSeconds;
         if (opponentDelay > 1.0f) {
+            // the opponent uses its leader at a random moment: 1 in 4 chance each turn
+            if (!opponentLeader->IsUsed() && rand() % 4 == 0) {
+                opponentLeader->Activate(*opponent, *player); // swapped: for it, the opponent is me
+            }
+
             if (!opponent->GetHand().empty()) { // could be 0, then rand would go kapoot
                 int random = rand() % opponent->GetHand().size();
                 opponent->GetBoard().push_back(opponent->GetHand()[random]);
@@ -629,6 +710,36 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
         }
         return;
     }
+
+    // leader select screen
+    if (state == GameState::LeaderSelectScreen) {
+        glm::ivec2 resolution = window->GetResolution();
+        float x = mouseX * LOGIC_W / resolution.x;
+        float y = (resolution.y - mouseY) * LOGIC_H / resolution.y;
+
+        for (int i = 0; i < leaders.size(); i++) {
+            float leaderX = LOGIC_W / 2 + (i - 1.5f) * 220;
+
+            // check if the player clicked inside the leader
+            if (glm::distance(glm::vec2(x, y), glm::vec2(leaderX, LOGIC_H / 2)) <= 50) {
+                if (i == selectedLeader) { // second click on the same leader: start the game
+                    playerLeader = leaders[i];
+
+                    int r = rand() % 4; // the opponent gets a random leader
+                    if (r == 0) opponentLeader = new FoltestLeader();
+                    else if (r == 1) opponentLeader = new EmhyrLeader();
+                    else if (r == 2) opponentLeader = new EredinLeader();
+                    else opponentLeader = new FrancescaLeader();
+
+                    state = GameState::GameScreen;
+                }
+                else {
+                    selectedLeader = i;
+                }
+            }
+        }
+        return;
+    }
     
     // Add mouse button press event
     if (gameOver) {
@@ -651,6 +762,12 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
             selectedCard = player->GetHand()[i];
             // cout << "picked " << selectedCard->GetPos().x << "\n";
         }
+    }
+
+    // use leaders ability
+    if (glm::distance(glm::vec2(x, y), glm::vec2(60, 270)) <= 50) {
+        playerLeader->Activate(*player, *opponent);
+        return;
     }
 }
 
