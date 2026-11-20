@@ -31,7 +31,7 @@ bool Card::CanBeOnLane(Lane newLane) const {
 }
 
 bool Card::IsMouseOver(float x, float y, float scale) const {
-	float xMin = pos.x - WIDTH * scale / 2; // pos = (0,0) - the center of the card
+	float xMin = pos.x - WIDTH * scale / 2; // pos = (0,0) = the center of the card
 	float xMax = pos.x + WIDTH * scale / 2;
 	float yMin = pos.y - HEIGHT * scale / 2;
 	float yMax = pos.y + HEIGHT * scale / 2;
@@ -135,4 +135,4 @@ float Card::GetFlipProgress() const {
 
 void Card::SetLane(Lane newLane) {
 	lane = newLane;
-}
+}

@@ -131,6 +131,8 @@ void Tema1::GoToNextRound() {
     // reset the cards
     player->SetLastCardPlayed(nullptr);
     opponent->SetLastCardPlayed(nullptr);
+    player->SetDoubleNextCard(false);
+    opponent->SetDoubleNextCard(false);
 
     // reset HP
     player->ResetHp();
@@ -908,7 +910,7 @@ void Tema1::Update(float deltaTimeSeconds)
                 }
                 opponent->SetLastCardPlayed(opponent->GetHand()[random]); // for Scorch, it saves the last played card
 
-                if (opponent->GetDoubleNextCard()) {
+                if (opponent->GetDoubleNextCard() && opponent->GetHand()[random]->GetType() != CardType::Decoy) {
                     opponent->GetHand()[random]->ModifyValue(opponent->GetHand()[random]->GetValue());
                     opponent->SetDoubleNextCard(false);
                 }
