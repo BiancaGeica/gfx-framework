@@ -55,6 +55,8 @@ namespace m1
         Card* AddRandomCard();
 
         void GoToNextRound();
+
+        void StartGame();
  
      protected:
         glm::mat3 modelMatrix;
@@ -72,14 +74,15 @@ namespace m1
         Card* selectedCard = nullptr; // nullptr means that I don't hold any card
 
         // time to show the HP on the screen
-        Player* player;
-        Player* opponent;
+        Player* player = nullptr;
+        Player* opponent = nullptr;
 
         // timer for opponent
         bool opponentTurn = false;
         float opponentDelay = 0;
 
         bool gameOver = false;
+        float gameOverTimer = 0; // i don't like the sudden screen change, so lets add a delay
 
         // flip animation for the opponent cards
         Card* flippingCard = nullptr; // the card that needs to flip

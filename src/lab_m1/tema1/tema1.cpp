@@ -119,13 +119,13 @@ void Tema1::ApplyEffects() {
 
         if (player->GetCrystals() == 0 || opponent->GetCrystals() == 0) {
             gameOver = true;
+            // state = GameState::OverviewScreen;
         }
         else {
             GoToNextRound();
         }
     }
 }
-
 
 void Tema1::GoToNextRound() {
     // clean the board at the end
@@ -156,6 +156,79 @@ float Tema1::TextWidth(std::string text, float scale) {
     return text.size() * 29.0f * scale;
 }
 
+void Tema1::StartGame() {
+    // throw away everything from the previous game
+    if (player != nullptr) {
+        for (int i = 0; i < player->GetHand().size(); i++) {
+            delete player->GetHand()[i];
+        }
+        for (int i = 0; i < player->GetBoard().size(); i++) {
+            delete player->GetBoard()[i];
+        }
+        delete player;
+    }
+    if (opponent != nullptr) {
+        for (int i = 0; i < opponent->GetHand().size(); i++) {
+            delete opponent->GetHand()[i];
+        }
+        for (int i = 0; i < opponent->GetBoard().size(); i++) {
+            delete opponent->GetBoard()[i];
+        }
+        delete opponent;
+    }
+    for (int i = 0; i < playerDeck.size(); i++) {
+        delete playerDeck[i];
+    }
+    for (int i = 0; i < opponentDeck.size(); i++) {
+        delete opponentDeck[i];
+    }
+    playerDeck.clear();
+    opponentDeck.clear();
+
+    for (int i = 0; i < leaders.size(); i++) {
+        delete leaders[i];
+    }
+    leaders.clear();
+    delete opponentLeader;
+
+    // reset all the counters
+    usedCards = 0;
+    maxCards = 10;
+    timeSincePreviousCard = 0;
+    selectedCard = nullptr;
+    opponentTurn = false;
+    opponentDelay = 0;
+    gameOver = false;
+    gameOverTimer = 0;
+    flippingCard = nullptr;
+    flipTimer = 0;
+    selectedLeader = -1;
+    playerLeader = nullptr;
+    opponentLeader = nullptr;
+
+    // ~*~ new leaders ~*~
+    leaders.push_back(new FoltestLeader());
+    leaders.push_back(new EmhyrLeader());
+    leaders.push_back(new EredinLeader());
+    leaders.push_back(new FrancescaLeader());
+
+    // new decks
+    for (int i = 0; i < 12; i++) {
+        playerDeck.push_back(AddRandomCard());
+        opponentDeck.push_back(AddRandomCard());
+    }
+    for (int i = 0; i < playerDeck.size(); i++) {
+        playerDeck[i]->SetPos(glm::vec2(LOGIC_W - 120 - 10, LOGIC_H / 2 - 90 - 10));
+    }
+    for (int i = 0; i < opponentDeck.size(); i++) {
+        opponentDeck[i]->SetPos(glm::vec2(LOGIC_W - 120 - 10, LOGIC_H / 2 + 90 + 10));
+    }
+
+    // new players
+    player = new Player(20);
+    opponent = new Player(20);
+}
+
 void Tema1::Init()
 {
     auto camera = GetSceneCamera();
@@ -177,10 +250,11 @@ void Tema1::Init()
     AddMeshToList(object2D::CreatePolygon("leader_hexagon", 50, 6, glm::vec3(1, 1, 1)));
     AddMeshToList(object2D::CreatePolygon("leader_diamond", 50, 4, glm::vec3(1, 1, 1)));
 
-    leaders.push_back(new FoltestLeader());
+    // I moved them in StartGame bc init can't be called everytime I want to play again so I made a new function
+   /* leaders.push_back(new FoltestLeader());
     leaders.push_back(new EmhyrLeader());
     leaders.push_back(new EredinLeader());
-    leaders.push_back(new FrancescaLeader());
+    leaders.push_back(new FrancescaLeader());*/
 
     srand(time(0)); // for random
 
@@ -199,55 +273,55 @@ void Tema1::Init()
     Mesh* hpPlayer = object2D::CreateRectangle("player_hp", 10, 10, glm::vec3(0.18f, 0.54f, 0.34f), true);
     AddMeshToList(hpPlayer);
 
-    // the cards that the player receives from the deck in the begining
-    /*playerDeck.push_back(new DamageCard(3, Lane::Melee));
-    playerDeck.push_back(new SpyCard(1, Lane::Melee));
-    playerDeck.push_back(new HealCard(2, Lane::Ranged));
-    playerDeck.push_back(new FrostCard(2));
-    playerDeck.push_back(new ScorchCard(3, Lane::Melee));
-    playerDeck.push_back(new DamageCard(1, Lane::Siege));
-    playerDeck.push_back(new HealCard(3, Lane::Melee));
-    playerDeck.push_back(new ShieldCard(2, Lane::Ranged));
-    playerDeck.push_back(new ClearWeatherCard(1, Lane::Melee));
-    playerDeck.push_back(new WarHornCard(1, Lane::Melee));*/
+    //// the cards that the player receives from the deck in the begining
+    ///*playerDeck.push_back(new DamageCard(3, Lane::Melee));
+    //playerDeck.push_back(new SpyCard(1, Lane::Melee));
+    //playerDeck.push_back(new HealCard(2, Lane::Ranged));
+    //playerDeck.push_back(new FrostCard(2));
+    //playerDeck.push_back(new ScorchCard(3, Lane::Melee));
+    //playerDeck.push_back(new DamageCard(1, Lane::Siege));
+    //playerDeck.push_back(new HealCard(3, Lane::Melee));
+    //playerDeck.push_back(new ShieldCard(2, Lane::Ranged));
+    //playerDeck.push_back(new ClearWeatherCard(1, Lane::Melee));
+    //playerDeck.push_back(new WarHornCard(1, Lane::Melee));*/
 
-    for (int i = 0; i < 12; i++) {
-        playerDeck.push_back(AddRandomCard());
-        opponentDeck.push_back(AddRandomCard());
-    }
+    //for (int i = 0; i < 12; i++) {
+    //    playerDeck.push_back(AddRandomCard());
+    //    opponentDeck.push_back(AddRandomCard());
+    //}
 
-    // the cards that the opponent receives from the deck in the begining
-    /*opponentDeck.push_back(new DamageCard(3, Lane::Melee));
-    opponentDeck.push_back(new SpyCard(1, Lane::Melee));
-    opponentDeck.push_back(new HealCard(2, Lane::Ranged));
-    opponentDeck.push_back(new FrostCard(2));
-    opponentDeck.push_back(new ScorchCard(3, Lane::Melee));
-    opponentDeck.push_back(new DamageCard(1, Lane::Siege));
-    opponentDeck.push_back(new HealCard(3, Lane::Melee));
-    opponentDeck.push_back(new ShieldCard(2, Lane::Ranged));
-    opponentDeck.push_back(new ClearWeatherCard(1, Lane::Melee));
-    opponentDeck.push_back(new WarHornCard(1, Lane::Melee));*/
+    //// the cards that the opponent receives from the deck in the begining
+    ///*opponentDeck.push_back(new DamageCard(3, Lane::Melee));
+    //opponentDeck.push_back(new SpyCard(1, Lane::Melee));
+    //opponentDeck.push_back(new HealCard(2, Lane::Ranged));
+    //opponentDeck.push_back(new FrostCard(2));
+    //opponentDeck.push_back(new ScorchCard(3, Lane::Melee));
+    //opponentDeck.push_back(new DamageCard(1, Lane::Siege));
+    //opponentDeck.push_back(new HealCard(3, Lane::Melee));
+    //opponentDeck.push_back(new ShieldCard(2, Lane::Ranged));
+    //opponentDeck.push_back(new ClearWeatherCard(1, Lane::Melee));
+    //opponentDeck.push_back(new WarHornCard(1, Lane::Melee));*/
 
-    for (int i = playerDeck.size() - 1; i > 0; i--) { // to shuffle the deck
-        int j = rand() % (i + 1);
-        std::swap(playerDeck[i], playerDeck[j]);
-    }
+    //for (int i = playerDeck.size() - 1; i > 0; i--) { // to shuffle the deck
+    //    int j = rand() % (i + 1);
+    //    std::swap(playerDeck[i], playerDeck[j]);
+    //}
 
-    for (int i = opponentDeck.size() - 1; i > 0; i--) { // to shuffle the deck
-        int j = rand() % (i + 1);
-        std::swap(opponentDeck[i], opponentDeck[j]);
-    }
+    //for (int i = opponentDeck.size() - 1; i > 0; i--) { // to shuffle the deck
+    //    int j = rand() % (i + 1);
+    //    std::swap(opponentDeck[i], opponentDeck[j]);
+    //}
 
-    for (int i = 0; i < playerDeck.size(); i++) {
-        playerDeck[i]->SetPos(glm::vec2(LOGIC_W - 120 - 10, LOGIC_H / 2 - 90 - 10));
-    }
+    //for (int i = 0; i < playerDeck.size(); i++) {
+    //    playerDeck[i]->SetPos(glm::vec2(LOGIC_W - 120 - 10, LOGIC_H / 2 - 90 - 10));
+    //}
 
-    for (int i = 0; i < opponentDeck.size(); i++) {
-        opponentDeck[i]->SetPos(glm::vec2(LOGIC_W - 120 - 10, LOGIC_H / 2 + 90 + 10));
-    }
+    //for (int i = 0; i < opponentDeck.size(); i++) {
+    //    opponentDeck[i]->SetPos(glm::vec2(LOGIC_W - 120 - 10, LOGIC_H / 2 + 90 + 10));
+    //}
 
-    player = new Player(20);
-    opponent = new Player(20);
+    //player = new Player(20);
+    //opponent = new Player(20);
 
     // triangle for temporary cards
     AddMeshToList(object2D::CreateTriangle("symbol_triangle", 28, glm::vec3(0, 0, 0), true));
@@ -256,6 +330,8 @@ void Tema1::Init()
     AddMeshToList(object2D::CreateRectangle("symbol_square", 24, 24, glm::vec3(0, 0, 0), true));
 
     AddMeshToList(object2D::CreateRectangle("crystal", 14, 14, glm::vec3(0.6f, 0.9f, 1.0f), true));
+
+    StartGame(); // the new function to restart the game in the final screen bc i can't call init again
 }
 
 
@@ -310,6 +386,29 @@ void Tema1::Update(float deltaTimeSeconds)
             modelMatrix *= transform2D::Translate(x, LOGIC_H / 2);
             RenderMesh2D(meshes[mesh], modelMatrix, leaders[i]->GetColor());
         }
+        return;
+    }
+
+    // final screen
+    if (state == GameState::OverviewScreen) {
+        std::string message = "YOU LOST";
+        glm::vec3 color = glm::vec3(0.9f, 0.3f, 0.3f); // red
+
+        if (player->GetCrystals() == opponent->GetCrystals()) {
+            message = "DRAW";
+            color = glm::vec3(0.85f, 0.65f, 0.2f); // gold
+        }
+        else if (player->GetCrystals() > opponent->GetCrystals()) {
+            message = "YOU WON!";
+            color = glm::vec3(0.3f, 0.8f, 0.5f); // green
+        }
+
+        textRenderer->RenderText(message, LOGIC_W / 2 - TextWidth(message, 1.5f) / 2, 250, 1.5f, color);
+
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(LOGIC_W / 2, 260);
+        RenderMesh2D(meshes["button"], modelMatrix, glm::vec3(0.2f, 0.5f, 0.3f));
+        textRenderer->RenderText("PLAY AGAIN", LOGIC_W / 2 - TextWidth("PLAY AGAIN", 0.6f) / 2, 450, 0.6f, glm::vec3(1, 1, 1));
         return;
     }
 
@@ -607,6 +706,14 @@ void Tema1::Update(float deltaTimeSeconds)
         opponentDelay = 0;
     }
 
+    // show final screen after a little delay
+    if (gameOver) {
+        gameOverTimer += deltaTimeSeconds;
+        if (gameOverTimer > 2.0f) {
+            state = GameState::OverviewScreen;
+        }
+    }
+
     // make the opponent put down cards with delay
     if (opponentTurn && flippingCard == nullptr) {
         opponentDelay += deltaTimeSeconds;
@@ -737,6 +844,19 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
                     selectedLeader = i;
                 }
             }
+        }
+        return;
+    }
+
+    // final screen
+    if (state == GameState::OverviewScreen) {
+        glm::ivec2 resolution = window->GetResolution();
+        float x = mouseX * LOGIC_W / resolution.x;
+        float y = (resolution.y - mouseY) * LOGIC_H / resolution.y;
+
+        if (x >= LOGIC_W / 2 - 120 && x <= LOGIC_W / 2 + 120 && y >= 260 - 40 && y <= 260 + 40) {
+            StartGame();
+            state = GameState::LeaderSelectScreen;
         }
         return;
     }
