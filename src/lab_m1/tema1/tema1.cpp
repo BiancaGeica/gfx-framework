@@ -27,7 +27,7 @@ Tema1::~Tema1()
 }
 
 Card* Tema1::AddRandomCard() {
-    int value = 1 + rand() % 3; // cards hp
+    int value = 3 + rand() % 3; // cards hp
     Lane lane = (Lane)(rand() % 3);// On witch lane is the temporary card: Melee, Ranged, Siege
 
     switch (rand() % 15) {
@@ -41,11 +41,11 @@ Card* Tema1::AddRandomCard() {
     case 7:  return new FogCard(value);
     case 8:  return new RainCard(value);
     case 9:  return new ScorchCard(value, lane);
-    case 10: return new SpyCard(1, lane);
-    case 11: return new WarHornCard(1, lane);
-    case 12: return new MedicCard(1, lane);
-    case 13: return new DecoyCard(1, lane);
-    default: return new ClearWeatherCard(1, lane);
+    case 10: return new SpyCard(3, lane);
+    case 11: return new WarHornCard(3, lane);
+    case 12: return new MedicCard(3, lane);
+    case 13: return new DecoyCard(3, lane);
+    default: return new ClearWeatherCard(3, lane);
     }
 }
 
@@ -89,22 +89,8 @@ void Tema1::ApplyEffects() {
     player->SetLastCardPlayed(nullptr);
     opponent->SetLastCardPlayed(nullptr);
 
-    for (int i = player->GetBoard().size() - 1; i >= 0; i--) {
-        if (player->GetBoard()[i]->IsDestroyed()) {
-            player->GetUsedCards().push_back(player->GetBoard()[i]);
-            player->GetBoard().erase(player->GetBoard().begin() + i);
-        }
-    }
-
-    for (int i = opponent->GetBoard().size() - 1; i >= 0; i--) {
-        if (opponent->GetBoard()[i]->IsDestroyed()) {
-            opponent->GetUsedCards().push_back(opponent->GetBoard()[i]);
-            opponent->GetBoard().erase(opponent->GetBoard().begin() + i);
-        }
-    }
-
-    LayoutBoard(player, true);
-    LayoutBoard(opponent, false);
+    RemoveDestroyed(player, true);
+    RemoveDestroyed(opponent, false);
     UpdateRow(player->GetHand(), 60, HAND_SCALE);
     UpdateRow(opponent->GetHand(), LOGIC_H - 60, HAND_SCALE);
 
@@ -183,6 +169,26 @@ void Tema1::LayoutBoard(Player* p, bool isPlayer) {
     }
 }
 
+void Tema1::RemoveDestroyed(Player* p, bool isPlayer) {
+    for (int i = p->GetBoard().size() - 1; i >= 0; i--) {
+        if (p->GetBoard()[i]->IsDestroyed()) {
+            p->GetUsedCards().push_back(p->GetBoard()[i]);
+            dyingCards.push_back(p->GetBoard()[i]);
+            dyingTimers.push_back(0);
+            p->GetBoard().erase(p->GetBoard().begin() + i);
+        }
+    }
+    LayoutBoard(p, isPlayer);
+}
+
+void Tema1::DrawCardLabel(Card* card, float scale) {
+    std::string label = card->GetLabel();
+    float size = 0.25f * scale;
+    float x = card->GetPos().x - TextWidth(label, size) / 2;
+    float y = LOGIC_H - (card->GetPos().y + (Card::HEIGHT / 2 - 5) * scale);
+    textRenderer->RenderText(label, x, y, size, glm::vec3(0.25f, 0.12f, 0.25f));
+}
+
 void Tema1::UseDecoy(Player* p, Card* decoy, int target) {
     Card* returned = p->GetBoard()[target];
     decoy->SetLane(returned->GetLane());
@@ -235,6 +241,8 @@ void Tema1::StartGame() {
 
     // reset all the counters
     usedCards = 0;
+    dyingCards.clear();
+    dyingTimers.clear();
     maxCards = 10;
     timeSincePreviousCard = 0;
     selectedCard = nullptr;
@@ -541,7 +549,7 @@ void Tema1::Update(float deltaTimeSeconds)
 
         // players lanes
         glm::vec3 laneColor = playerBoardColor;
-        if (selectedCard != nullptr && selectedCard->GetType() != CardType::Decoy && selectedCard->CanBeOnLane(lane)) {
+        if (selectedCard != nullptr && (selectedCard->GetType() != CardType::Decoy || player->GetBoard().empty()) && selectedCard->CanBeOnLane(lane)) {
             laneColor = glm::vec3(0.13f, 0.71f, 0.66f); // highlight
         }
 
@@ -610,10 +618,11 @@ void Tema1::Update(float deltaTimeSeconds)
             RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         else
             RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+        DrawCardLabel(card, 1);
 
         for (int i = 0; i < card->GetValue(); i++) {
             modelMatrix = glm::mat3(1);
-            modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 6 + i * 8, positionCurrentCard.y - Card::HEIGHT / 2 + 6); // 4 pixels to the right of the previous square
+            modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 6 + (i % 5) * 8, positionCurrentCard.y - Card::HEIGHT / 2 + 6 + (i / 5) * 8); // 4 pixels to the right of the previous square
             RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         }
     }
@@ -641,10 +650,11 @@ void Tema1::Update(float deltaTimeSeconds)
             RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         else
             RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+        DrawCardLabel(card, HAND_SCALE);
 
         for (int i = 0; i < card->GetValue(); i++) {
             modelMatrix = glm::mat3(1);
-            modelMatrix *= transform2D::Translate(positionCurrentCard.x + (-Card::WIDTH / 2 + 6 + i * 8) * HAND_SCALE, positionCurrentCard.y + (-Card::HEIGHT / 2 + 6) * HAND_SCALE); // 4 pixels to the right of the previous square
+            modelMatrix *= transform2D::Translate(positionCurrentCard.x + (-Card::WIDTH / 2 + 6 + (i % 5) * 8) * HAND_SCALE, positionCurrentCard.y + (-Card::HEIGHT / 2 + 6 + (i / 5) * 8) * HAND_SCALE); // 4 pixels to the right of the previous square
             modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
             RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         }
@@ -687,10 +697,11 @@ void Tema1::Update(float deltaTimeSeconds)
             RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
 
         if (card->GetFlipProgress() < 1) continue; // the squares don't shrink, so hide them while flipping
+        DrawCardLabel(card, HAND_SCALE);
 
         for (int j = 0; j < card->GetValue(); j++) {
             modelMatrix = glm::mat3(1);
-            modelMatrix *= transform2D::Translate(positionCurrentCard.x + (-Card::WIDTH / 2 + 6 + j * 8) * HAND_SCALE, positionCurrentCard.y + (-Card::HEIGHT / 2 + 6) * HAND_SCALE);
+            modelMatrix *= transform2D::Translate(positionCurrentCard.x + (-Card::WIDTH / 2 + 6 + (j % 5) * 8) * HAND_SCALE, positionCurrentCard.y + (-Card::HEIGHT / 2 + 6 + (j / 5) * 8) * HAND_SCALE);
             modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
             RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         }
@@ -796,13 +807,45 @@ void Tema1::Update(float deltaTimeSeconds)
         if (card == flippingCard) {
             continue; // the squares don't shrink with the card, so they should stay hided durring the flip
         }
+        DrawCardLabel(card, 1);
 
         for (int i = 0; i < card->GetValue(); i++) {
             modelMatrix = glm::mat3(1);
-            modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 6 + i * 8, positionCurrentCard.y - Card::HEIGHT / 2 + 6); // 4 pixels to the right of the previous square
+            modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 6 + (i % 5) * 8, positionCurrentCard.y - Card::HEIGHT / 2 + 6 + (i / 5) * 8); // 4 pixels to the right of the previous square
             
             RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         }
+    }
+
+    for (int i = dyingCards.size() - 1; i >= 0; i--) {
+        dyingTimers[i] += deltaTimeSeconds;
+        float t = dyingTimers[i] / 0.5f;
+
+        if (t >= 1) {
+            dyingCards.erase(dyingCards.begin() + i);
+            dyingTimers.erase(dyingTimers.begin() + i);
+            continue;
+        }
+
+        float scale;
+        if (t < 0.4f) {
+            scale = 1 + 1.5f * (t / 0.4f);
+        }
+        else {
+            scale = 2.5f * (1 - (t - 0.4f) / 0.6f);
+        }
+
+        Card* card = dyingCards[i];
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(card->GetPos().x, card->GetPos().y);
+        modelMatrix *= transform2D::Scale(scale, scale);
+        RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+        RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
+
+        if (card->IsTemporary())
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+        else
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
     }
 
     // draw the selected card because it went under other things when being hoovered over the screen and that's not cute
@@ -820,10 +863,11 @@ void Tema1::Update(float deltaTimeSeconds)
             RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         else
             RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+        DrawCardLabel(selectedCard, HAND_SCALE);
 
         for (int i = 0; i < selectedCard->GetValue(); i++) {
             modelMatrix = glm::mat3(1);
-            modelMatrix *= transform2D::Translate(positionCurrentCard.x + (-Card::WIDTH / 2 + 6 + i * 8) * HAND_SCALE, positionCurrentCard.y + (-Card::HEIGHT / 2 + 6) * HAND_SCALE); // 4 pixels to the right of the previous square
+            modelMatrix *= transform2D::Translate(positionCurrentCard.x + (-Card::WIDTH / 2 + 6 + (i % 5) * 8) * HAND_SCALE, positionCurrentCard.y + (-Card::HEIGHT / 2 + 6 + (i / 5) * 8) * HAND_SCALE); // 4 pixels to the right of the previous square
             modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
             RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         }
@@ -850,6 +894,8 @@ void Tema1::Update(float deltaTimeSeconds)
             // the opponent uses its leader at a random moment: 1 in 4 chance each turn
             if (!opponentLeader->IsUsed() && rand() % 4 == 0) {
                 opponentLeader->Activate(*opponent, *player); // swapped: for it, the opponent is me
+                RemoveDestroyed(player, true);
+                RemoveDestroyed(opponent, false);
             }
 
             if (!opponent->GetHand().empty()) { // could be 0, then rand would go kapoot
@@ -1021,6 +1067,8 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
     // use leaders ability
     if (glm::distance(glm::vec2(x, y), glm::vec2(60, 270)) <= 50) {
         playerLeader->Activate(*player, *opponent);
+        RemoveDestroyed(player, true);
+        RemoveDestroyed(opponent, false);
         return;
     }
 }
@@ -1033,7 +1081,7 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
     float x = mouseX * LOGIC_W / resolution.x;
     float y = (resolution.y - mouseY) * LOGIC_H / resolution.y;
 
-    if (selectedCard != nullptr && selectedCard->GetType() == CardType::Decoy) {
+    if (selectedCard != nullptr && selectedCard->GetType() == CardType::Decoy && !player->GetBoard().empty()) {
         for (int t = 0; t < player->GetBoard().size(); t++) {
             if (player->GetBoard()[t]->IsMouseOver(x, y)) {
                 for (int i = 0; i < player->GetHand().size(); i++) {

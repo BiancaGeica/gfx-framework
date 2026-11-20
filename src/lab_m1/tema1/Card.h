@@ -1,5 +1,6 @@
 #pragma once // includes the file a single time
 
+#include <string>
 #include "utils/glm_utils.h" // glm::vec2, glm::vec3
 #include "lab_m1/tema1/Player.h"
 
@@ -42,6 +43,7 @@ public:
 	void ModifyValue(int delta);
 	void ResetValue();
 	bool IsDestroyed() const;
+	std::string GetLabel() const;
 
 	// getters
 	int GetValue() const;

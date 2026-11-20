@@ -97,6 +97,8 @@ namespace m1
         float LaneY(Lane lane, bool isPlayer);
         void LayoutBoard(Player* p, bool isPlayer);
         void UseDecoy(Player* p, Card* decoy, int target);
+        void RemoveDestroyed(Player* p, bool isPlayer);
+        void DrawCardLabel(Card* card, float scale);
 
         // leaders
         std::vector<Leader*> leaders;
@@ -107,5 +109,8 @@ namespace m1
         // total cards (bc I have 12 cards and only 10 in hand, I need to count how many are used)
         int usedCards = 0;
         int maxCards = 10;
+
+        std::vector<Card*> dyingCards;
+        std::vector<float> dyingTimers;
     };
 }   // namespace m1

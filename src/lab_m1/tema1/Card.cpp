@@ -69,6 +69,24 @@ bool Card::IsDestroyed() const {
 	return false;
 }
 
+std::string Card::GetLabel() const {
+	switch (GetType()) {
+	case CardType::Damage: return "DMG";
+	case CardType::Heal: return "HEAL";
+	case CardType::Shield: return "SHLD";
+	case CardType::Spy: return "SPY";
+	case CardType::FrostWeather: return "FRST";
+	case CardType::FogWeather: return "FOG";
+	case CardType::RainWeather: return "RAIN";
+	case CardType::ClearWeather: return "CLR";
+	case CardType::WarHorn: return "HORN";
+	case CardType::Scorch: return "SCRH";
+	case CardType::Decoy: return "DCOY";
+	case CardType::Medic: return "MED";
+	}
+	return "";
+}
+
 // getters
 int Card::GetValue() const {
 	return value;
@@ -117,4 +135,4 @@ float Card::GetFlipProgress() const {
 
 void Card::SetLane(Lane newLane) {
 	lane = newLane;
-}
+}
