@@ -34,7 +34,7 @@ public:
 	virtual bool CanBeOnLane(Lane newLane) const; // verify if the card could be placed on the specified lane
 
 	// functions for all cards, DON'T OVERRIDE THEM or something
-	bool IsMouseOver(float x, float y) const;
+	bool IsMouseOver(float x, float y, float scale = 1.0f) const;
 	void UpdateAnimation(float deltaTime);
 	// startFlip and GetFlipProgress are used for the card flip animation for those 3 cards for Emhyr
 	void StartFlip(float delay);
@@ -55,6 +55,7 @@ public:
 	void SetTargetPos(glm::vec2 newTarget);
 	void SetFaceUp(bool up);
 	void SetCancelled(bool c);
+	void SetLane(Lane newLane); // for the cards that can go to any line
 
 	static const float WIDTH; // static because I have a value for all, not for every single card
 	static const float HEIGHT;

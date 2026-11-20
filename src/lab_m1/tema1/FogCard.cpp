@@ -21,3 +21,7 @@ void FogCard::ApplyTurnEffect(Player& owner, Player& opponent) {
 		}
 	}
 }
+
+bool FogCard::CanBeOnLane(Lane newLane) const {
+	return newLane == lane; // weather goes only on its own lane
+}

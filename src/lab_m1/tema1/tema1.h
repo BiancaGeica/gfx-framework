@@ -48,7 +48,7 @@ namespace m1
         void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
         void OnWindowResize(int width, int height) override;
 
-        void UpdateRow(std::vector<Card*>& row, float y); // everytime I need to move cards I should copy-paste the same code to rearange the player cards
+        void UpdateRow(std::vector<Card*>& row, float y, float scale = 1.0f); // everytime I need to move cards I should copy-paste the same code to rearange the player cards
 
         void ApplyEffects();
 
@@ -62,6 +62,7 @@ namespace m1
         glm::mat3 modelMatrix;
         static constexpr float LOGIC_W = 1280.0f; // constexpr is fixed at compile time so I don't write it again in cpp
         static constexpr float LOGIC_H = 720.0f; // logic because it's not the real size of the screen
+        static constexpr float HAND_SCALE = 1.4f;
 
         //std::vector<Card*> playerCards; should delete them because while adding spy I realized that I need to have direct access to the hands
         //std::vector<Card*> opponentCards; so that the card woldn't be drawn in the opponents hand after moving it to the player
@@ -91,6 +92,8 @@ namespace m1
         GameState state = GameState::WelcomeScreen; // screen to start the game so the cards don't start to fly before the player is ready
         gfxc::TextRenderer* textRenderer;
         float TextWidth(std::string text, float scale);
+        float LaneY(Lane lane, bool isPlayer);
+        void LayoutBoard(Player* p, bool isPlayer);
 
         // leaders
         std::vector<Leader*> leaders;

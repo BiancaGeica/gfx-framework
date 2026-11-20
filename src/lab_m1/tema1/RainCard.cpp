@@ -21,3 +21,7 @@ void RainCard::ApplyTurnEffect(Player& owner, Player& opponent) {
 		}
 	}
 }
+
+bool RainCard::CanBeOnLane(Lane newLane) const {
+	return newLane == lane; // weather goes only on its own lane
+}

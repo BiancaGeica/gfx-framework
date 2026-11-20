@@ -1,7 +1,7 @@
 #include "lab_m1/tema1/Card.h"
 
-const float Card::WIDTH = 80.0f;
-const float Card::HEIGHT = 120.0f;
+const float Card::WIDTH = 50.0f;
+const float Card::HEIGHT = 75.0f;
 
 Card::Card(int value, Lane lane) :
 	value(value), // initializer list
@@ -30,11 +30,11 @@ bool Card::CanBeOnLane(Lane newLane) const {
 	return lane == newLane;
 }
 
-bool Card::IsMouseOver(float x, float y) const {
-	float xMin = pos.x - WIDTH / 2; // pos = (0,0) - the center of the card
-	float xMax = pos.x + WIDTH / 2;
-	float yMin = pos.y - HEIGHT / 2;
-	float yMax = pos.y + HEIGHT / 2;
+bool Card::IsMouseOver(float x, float y, float scale) const {
+	float xMin = pos.x - WIDTH * scale / 2; // pos = (0,0) - the center of the card
+	float xMax = pos.x + WIDTH * scale / 2;
+	float yMin = pos.y - HEIGHT * scale / 2;
+	float yMax = pos.y + HEIGHT * scale / 2;
 	
 	if (xMin <= x && xMax >= x && yMin <= y && yMax >= y)
 		return true;
@@ -113,4 +113,8 @@ void Card::StartFlip(float delay) {
 
 float Card::GetFlipProgress() const {
 	return flipProgress;
+}
+
+void Card::SetLane(Lane newLane) {
+	lane = newLane;
 }

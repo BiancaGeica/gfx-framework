@@ -21,3 +21,7 @@ void FrostCard::ApplyTurnEffect(Player& owner, Player& opponent) {
 		}
 	}
 }
+
+bool FrostCard::CanBeOnLane(Lane newLane) const {
+	return newLane == lane; // weather goes only on its own lane
+}

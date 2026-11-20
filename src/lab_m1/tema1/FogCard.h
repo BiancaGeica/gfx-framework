@@ -10,4 +10,5 @@ public:
 	CardType GetType() const override;
 	int GetPriority() const override;
 	void ApplyTurnEffect(Player& owner, Player& opponent) override;
+	bool CanBeOnLane(Lane newLane) const override;
 };
