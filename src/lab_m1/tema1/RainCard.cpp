@@ -3,7 +3,7 @@
 RainCard::RainCard(int value) : TemporaryCard(value, Lane::Siege) {}
 
 glm::vec3 RainCard::GetColor() const {
-	return glm::vec3(0.5f, 0.7f, 1.0f); // light blue
+	return glm::vec3(0.13f, 0.71f, 0.66f); // light blue
 }
 
 CardType RainCard::GetType() const {

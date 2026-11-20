@@ -3,7 +3,7 @@
 WarHornCard::WarHornCard(int value, Lane lane) : TemporaryCard(value, lane) {}
 
 glm::vec3 WarHornCard::GetColor() const {
-	return glm::vec3(1, 0.5f, 0); // orange
+	return glm::vec3(0.97f, 0.58f, 0.28f); // orange
 }
 
 CardType WarHornCard::GetType() const {

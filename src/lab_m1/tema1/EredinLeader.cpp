@@ -18,3 +18,7 @@ void EredinLeader::UseAbility(Player& owner, Player& opponent) {
 		}
 	}
 }
+
+std::string EredinLeader::GetName() const {
+	return "EREDIN";
+}

@@ -26,3 +26,7 @@ void FrancescaLeader::UseAbility(Player& owner, Player& opponent) {
 		strongest->ModifyValue(-strongest->GetValue()); // kill it
 	}
 }
+
+std::string FrancescaLeader::GetName() const {
+	return "FRANCESCA";
+}

@@ -3,7 +3,7 @@
 ClearWeatherCard::ClearWeatherCard(int value, Lane lane) : TemporaryCard(value, lane){}
 
 glm::vec3 ClearWeatherCard::GetColor() const {
-	return glm::vec3(1, 1, 0); // yellow
+	return glm::vec3(0.89f, 0.91f, 0.35f); // yellow
 }
 
 CardType ClearWeatherCard::GetType() const {

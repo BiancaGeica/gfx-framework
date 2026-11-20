@@ -3,7 +3,7 @@
 FogCard::FogCard(int value) : TemporaryCard(value, Lane::Ranged) {}
 
 glm::vec3 FogCard::GetColor() const {
-	return glm::vec3(0.7f, 0.7f, 0.7f); // light gray
+	return glm::vec3(0.75f, 0.75f, 0.78f); // light gray
 }
 
 CardType FogCard::GetType() const {

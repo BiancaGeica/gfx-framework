@@ -3,7 +3,7 @@
 DamageCard::DamageCard(int value, Lane lane) : PermanentCard(value, lane) {}
 
 glm::vec3 DamageCard::GetColor() const {
-	return glm::vec3(1, 0, 0);
+	return glm::vec3(0.93f, 0.36f, 0.36f);
 }
 
 CardType DamageCard::GetType() const {

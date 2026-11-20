@@ -10,6 +10,7 @@ public:
 
 	virtual std::string GetMeshName() const = 0; // get witch shape to draw
 	virtual glm::vec3 GetColor() const = 0;
+	virtual std::string GetName() const = 0;
 
 	void Activate(Player& owner, Player& opponent);
 	bool IsUsed() const;

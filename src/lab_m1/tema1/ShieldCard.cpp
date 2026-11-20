@@ -3,7 +3,7 @@
 ShieldCard::ShieldCard(int value, Lane lane) : PermanentCard(value, lane) {}
 
 glm::vec3 ShieldCard::GetColor() const {
-	return glm::vec3(0, 0, 1);
+	return glm::vec3(0.40f, 0.62f, 0.90f);
 }
 
 CardType ShieldCard::GetType() const {

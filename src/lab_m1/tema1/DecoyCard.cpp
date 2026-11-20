@@ -3,7 +3,7 @@
 DecoyCard::DecoyCard(int value, Lane lane) : TemporaryCard(value, lane) {}
 
 glm::vec3 DecoyCard::GetColor() const {
-	return glm::vec3(0.0f, 0.6f, 0.6f);
+	return glm::vec3(0.80f, 0.71f, 0.86f);
 }
 
 CardType DecoyCard::GetType() const {

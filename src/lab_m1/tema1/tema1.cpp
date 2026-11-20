@@ -55,7 +55,7 @@ void Tema1::UpdateRow(std::vector<Card*>& row, float y, float scale) {
     float distanceBetweenCards = 10.0f;
     float cardWidth = Card::WIDTH * scale;
     float rowWidth = numberCardsHand * cardWidth + (numberCardsHand - 1) * distanceBetweenCards;
-    float firstCardX = LOGIC_W / 2 - 70 - rowWidth / 2 + cardWidth / 2; // LOGIC_W / 2 - 70 is the x of the card in the middle
+    float firstCardX = LOGIC_W / 2 - 30 - rowWidth / 2 + cardWidth / 2; // LOGIC_W / 2 - 30 is the x of the card in the middle
 
     for (int i = 0; i < numberCardsHand; i++) {
         row[i]->SetTargetPos(glm::vec2(firstCardX + i * (cardWidth + distanceBetweenCards), y));
@@ -302,6 +302,7 @@ void Tema1::Init()
 
     Mesh* card = object2D::CreateRectangle("card", Card::WIDTH, Card::HEIGHT, glm::vec3(1, 1, 1), true);
     AddMeshToList(card);
+    AddMeshToList(object2D::CreateRectangle("card_border", Card::WIDTH + 6, Card::HEIGHT + 6, glm::vec3(1, 1, 1), true));
 
     Mesh* boardOpponent = object2D::CreateRectangle("opponent_board", 900, 180, glm::vec3(0.3f, 0.1f, 0.1f), true);
     AddMeshToList(boardOpponent);
@@ -382,7 +383,7 @@ void Tema1::Init()
 void Tema1::FrameStart()
 {
     // Clears the color buffer (using the previously set color) and depth buffer
-    glClearColor(0, 0, 0, 1);
+    glClearColor(0.96f, 0.69f, 0.29f, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::ivec2 resolution = window->GetResolution();
@@ -398,14 +399,49 @@ void Tema1::Update(float deltaTimeSeconds)
 {
     // welcome screen
     if (state == GameState::WelcomeScreen) {
-        textRenderer->RenderText("WELCOME TO GWENT!", LOGIC_W / 2 - TextWidth("WELCOME TO GWENT!", 1.0f) / 2, 250, 1.0f, glm::vec3(0.3f, 0.8f, 0.5f));
-        textRenderer->RenderText("THE", LOGIC_W / 2 - TextWidth("THE", 0.5f) / 2, 320, 0.5f, glm::vec3(0.85f, 0.65f, 0.2f));
-        textRenderer->RenderText("WITCHER CARD GAME", LOGIC_W / 2 - TextWidth("WITCHER CARD GAME", 0.5f) / 2, 350, 0.5f, glm::vec3(0.85f, 0.65f, 0.2f));
+        glm::vec2 cardPos[4] = { glm::vec2(90, 650), glm::vec2(70, 470), glm::vec2(170, 290), glm::vec2(110, 110) };
+        float cardAngle[4] = { 30.0f, -20.0f, 35.0f, -15.0f };
+        glm::vec3 leftColors[4] = { glm::vec3(0.93f, 0.36f, 0.36f), glm::vec3(0.72f, 0.85f, 0.42f), glm::vec3(0.40f, 0.62f, 0.90f), glm::vec3(0.93f, 0.36f, 0.36f) };
+        glm::vec3 rightColors[4] = { glm::vec3(0.98f, 0.96f, 0.90f), glm::vec3(0.97f, 0.58f, 0.28f), glm::vec3(0.62f, 0.40f, 0.75f), glm::vec3(0.89f, 0.91f, 0.35f) };
+
+        for (int i = 0; i < 4; i++) {
+            float angle = glm::radians(cardAngle[i]);
+
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(cardPos[i].x, cardPos[i].y);
+            modelMatrix *= transform2D::Rotate(angle);
+            modelMatrix *= transform2D::Scale(2.5f, 2.5f);
+            RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+            RenderMesh2D(meshes["card"], modelMatrix, leftColors[i]);
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(LOGIC_W - cardPos[i].x, cardPos[i].y);
+            modelMatrix *= transform2D::Rotate(-angle);
+            modelMatrix *= transform2D::Scale(2.5f, 2.5f);
+            RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+            RenderMesh2D(meshes["card"], modelMatrix, rightColors[i]);
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+        }
+
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(LOGIC_W / 2, 405);
+        modelMatrix *= transform2D::Scale(2.6f, 2.5f);
+        RenderMesh2D(meshes["button"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(LOGIC_W / 2, 405);
+        modelMatrix *= transform2D::Scale(2.55f, 2.4f);
+        RenderMesh2D(meshes["button"], modelMatrix, glm::vec3(0.96f, 0.69f, 0.29f));
+
+        textRenderer->RenderText("WELCOME TO GWENT!", LOGIC_W / 2 - TextWidth("WELCOME TO GWENT!", 1.0f) / 2, 250, 1.0f, glm::vec3(0.85f, 0.20f, 0.54f));
+        textRenderer->RenderText("THE", LOGIC_W / 2 - TextWidth("THE", 0.5f) / 2, 320, 0.5f, glm::vec3(0.25f, 0.12f, 0.25f));
+        textRenderer->RenderText("WITCHER CARD GAME", LOGIC_W / 2 - TextWidth("WITCHER CARD GAME", 0.5f) / 2, 350, 0.5f, glm::vec3(0.25f, 0.12f, 0.25f));
 
         // button is centered at y = 260 from the bottom witch means 460 from the top
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(LOGIC_W / 2, 260);
-        RenderMesh2D(meshes["button"], modelMatrix, glm::vec3(0.2f, 0.5f, 0.3f));
+        RenderMesh2D(meshes["button"], modelMatrix, glm::vec3(0.13f, 0.71f, 0.66f));
 
         textRenderer->RenderText("START", LOGIC_W / 2 - TextWidth("START", 0.8f) / 2, 446, 0.8f, glm::vec3(1, 1, 1));
         return; // don't draw the game!!!!!!!!!!
@@ -413,7 +449,7 @@ void Tema1::Update(float deltaTimeSeconds)
 
     // leader select screen
     if (state == GameState::LeaderSelectScreen) {
-        textRenderer->RenderText("CHOOSE YOUR LEADER", LOGIC_W / 2 - TextWidth("CHOOSE YOUR LEADER", 1.0f) / 2, 150, 1.0f, glm::vec3(0.85f, 0.65f, 0.2f));
+        textRenderer->RenderText("CHOOSE YOUR LEADER", LOGIC_W / 2 - TextWidth("CHOOSE YOUR LEADER", 1.0f) / 2, 150, 1.0f, glm::vec3(0.25f, 0.12f, 0.25f));
 
         for (int i = 0; i < leaders.size(); i++) {
             float x = LOGIC_W / 2 + (i - 1.5f) * 220;
@@ -422,13 +458,22 @@ void Tema1::Update(float deltaTimeSeconds)
             if (i == selectedLeader) { // highlight
                 modelMatrix = glm::mat3(1);
                 modelMatrix *= transform2D::Translate(x, LOGIC_H / 2);
-                modelMatrix *= transform2D::Scale(1.15f, 1.15f);
-                RenderMesh2D(meshes[mesh], modelMatrix, glm::vec3(0.2f, 0.4f, 1.0f));
+                modelMatrix *= transform2D::Scale(3 * 1.15f, 3 * 1.15f);
+                RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.2f, 0.4f, 1.0f));
             }
 
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(x, LOGIC_H / 2);
+            modelMatrix *= transform2D::Scale(3, 3);
+            RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+            RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.98f, 0.96f, 0.90f));
+
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(x, LOGIC_H / 2);
             RenderMesh2D(meshes[mesh], modelMatrix, leaders[i]->GetColor());
+
+            std::string name = leaders[i]->GetName();
+            textRenderer->RenderText(name, x - TextWidth(name, 0.5f) / 2, 500, 0.5f, glm::vec3(0.25f, 0.12f, 0.25f));
         }
         return;
     }
@@ -436,22 +481,22 @@ void Tema1::Update(float deltaTimeSeconds)
     // final screen
     if (state == GameState::OverviewScreen) {
         std::string message = "YOU LOST";
-        glm::vec3 color = glm::vec3(0.9f, 0.3f, 0.3f); // red
+        glm::vec3 color = glm::vec3(0.85f, 0.20f, 0.54f); // red
 
         if (player->GetCrystals() == opponent->GetCrystals()) {
             message = "DRAW";
-            color = glm::vec3(0.85f, 0.65f, 0.2f); // gold
+            color = glm::vec3(0.25f, 0.12f, 0.25f); // gold
         }
         else if (player->GetCrystals() > opponent->GetCrystals()) {
             message = "YOU WON!";
-            color = glm::vec3(0.3f, 0.8f, 0.5f); // green
+            color = glm::vec3(0.13f, 0.60f, 0.55f); // green
         }
 
         textRenderer->RenderText(message, LOGIC_W / 2 - TextWidth(message, 1.5f) / 2, 250, 1.5f, color);
 
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(LOGIC_W / 2, 260);
-        RenderMesh2D(meshes["button"], modelMatrix, glm::vec3(0.2f, 0.5f, 0.3f));
+        RenderMesh2D(meshes["button"], modelMatrix, glm::vec3(0.13f, 0.71f, 0.66f));
         textRenderer->RenderText("PLAY AGAIN", LOGIC_W / 2 - TextWidth("PLAY AGAIN", 0.6f) / 2, 450, 0.6f, glm::vec3(1, 1, 1));
         return;
     }
@@ -467,21 +512,21 @@ void Tema1::Update(float deltaTimeSeconds)
     RenderMesh2D(meshes[opponentLeader->GetMeshName()], modelMatrix,
         opponentLeader->IsUsed() ? glm::vec3(0.4f, 0.4f, 0.4f) : opponentLeader->GetColor());
     
-    glm::vec3 playerBoardColor = glm::vec3(0.1f, 0.1f, 0.3f); // used to change the color of the boards to show who won
-    glm::vec3 opponentBoardColor = glm::vec3(0.3f, 0.1f, 0.1f);
+    glm::vec3 playerBoardColor = glm::vec3(0.80f, 0.92f, 0.85f); // used to change the color of the boards to show who won
+    glm::vec3 opponentBoardColor = glm::vec3(0.97f, 0.80f, 0.80f);
 
     if (gameOver) {
         if (player->GetCrystals() == opponent->GetCrystals()) { // draw
-            playerBoardColor = glm::vec3(1, 1, 0);
-            opponentBoardColor = glm::vec3(1, 1, 0);
+            playerBoardColor = glm::vec3(0.89f, 0.91f, 0.35f);
+            opponentBoardColor = glm::vec3(0.89f, 0.91f, 0.35f);
         }
         else if (player->GetCrystals() > opponent->GetCrystals()) { // player won
-            playerBoardColor = glm::vec3(0, 1, 0);
-            opponentBoardColor = glm::vec3(1, 0, 0);
+            playerBoardColor = glm::vec3(0.72f, 0.85f, 0.42f);
+            opponentBoardColor = glm::vec3(0.93f, 0.36f, 0.36f);
         }
         else {
-            playerBoardColor = glm::vec3(1, 0, 0); // opponent won
-            opponentBoardColor = glm::vec3(0, 1, 0);
+            playerBoardColor = glm::vec3(0.93f, 0.36f, 0.36f); // opponent won
+            opponentBoardColor = glm::vec3(0.72f, 0.85f, 0.42f);
         }
     }
     
@@ -491,17 +536,17 @@ void Tema1::Update(float deltaTimeSeconds)
 
         // opponent's lanes
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(LOGIC_W / 2 - 70, LaneY(lane, false));
+        modelMatrix *= transform2D::Translate(LOGIC_W / 2 - 30, LaneY(lane, false));
         RenderMesh2D(meshes["lane"], modelMatrix, opponentBoardColor);
 
         // players lanes
         glm::vec3 laneColor = playerBoardColor;
         if (selectedCard != nullptr && selectedCard->GetType() != CardType::Decoy && selectedCard->CanBeOnLane(lane)) {
-            laneColor = glm::vec3(0.2f, 0.45f, 0.3f); // highlight
+            laneColor = glm::vec3(0.13f, 0.71f, 0.66f); // highlight
         }
 
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(LOGIC_W / 2 - 70, LaneY(lane, true));
+        modelMatrix *= transform2D::Translate(LOGIC_W / 2 - 30, LaneY(lane, true));
         RenderMesh2D(meshes["lane"], modelMatrix, laneColor);
     }
 
@@ -509,34 +554,40 @@ void Tema1::Update(float deltaTimeSeconds)
     modelMatrix = glm::mat3(1);
     modelMatrix = transform2D::Translate(LOGIC_W - 120, LOGIC_H / 2 - 90);
     modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
-    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.2f, 0.2f, 0.3f));
+    RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
 
 
     modelMatrix = glm::mat3(1);
     modelMatrix = transform2D::Translate(LOGIC_W - 120 - 5, LOGIC_H / 2 - 90 - 5);
     modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
-    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.54f, 0.17f, 0.88f));
+    RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.93f, 0.45f, 0.70f));
 
     modelMatrix = glm::mat3(1);
     modelMatrix = transform2D::Translate(LOGIC_W - 120 - 10, LOGIC_H / 2 - 90 - 10);
     modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
-    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.55f, 0.0f, 0.55f));
+    RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.85f, 0.20f, 0.54f));
 
     // the opponents deck
     modelMatrix = glm::mat3(1);
     modelMatrix = transform2D::Translate(LOGIC_W - 120, LOGIC_H / 2 + 90);
     modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
-    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.2f, 0.2f, 0.3f));
+    RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
 
     modelMatrix = glm::mat3(1);
     modelMatrix = transform2D::Translate(LOGIC_W - 120 - 5, LOGIC_H / 2 + 90 + 5);
     modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
-    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.54f, 0.17f, 0.88f));
+    RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.93f, 0.45f, 0.70f));
 
     modelMatrix = glm::mat3(1);
     modelMatrix = transform2D::Translate(LOGIC_W - 120 - 10, LOGIC_H / 2 + 90 + 10);
     modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
-    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.55f, 0.0f, 0.55f));
+    RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+    RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.85f, 0.20f, 0.54f));
 
     // players cards that are on the board
     for (int i = 0; i < player->GetBoard().size(); i++) {
@@ -551,18 +602,19 @@ void Tema1::Update(float deltaTimeSeconds)
         if (selectedCard != nullptr && selectedCard->GetType() == CardType::Decoy) {
             RenderMesh2D(meshes["card"], modelMatrix * transform2D::Scale(1.15f, 1.15f), glm::vec3(0.2f, 0.4f, 1.0f));
         }
+        RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
 
         // render the symbol: triangle for temporary card and square for permanent
         if (card->IsTemporary())
-            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0, 0, 0));
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         else
-            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
 
         for (int i = 0; i < card->GetValue(); i++) {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 6 + i * 8, positionCurrentCard.y - Card::HEIGHT / 2 + 6); // 4 pixels to the right of the previous square
-            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         }
     }
 
@@ -581,19 +633,20 @@ void Tema1::Update(float deltaTimeSeconds)
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
         modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
+        RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
 
         // render the symbol: triangle for temporary card and square for permanent
         if (card->IsTemporary())
-            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0, 0, 0));
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         else
-            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
 
         for (int i = 0; i < card->GetValue(); i++) {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(positionCurrentCard.x + (-Card::WIDTH / 2 + 6 + i * 8) * HAND_SCALE, positionCurrentCard.y + (-Card::HEIGHT / 2 + 6) * HAND_SCALE); // 4 pixels to the right of the previous square
             modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
-            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         }
     }
 
@@ -619,17 +672,19 @@ void Tema1::Update(float deltaTimeSeconds)
         modelMatrix *= transform2D::Scale(scaleX * HAND_SCALE, HAND_SCALE);
 
         if (!showFace) { // hidden: only the back
-            RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.55f, 0.0f, 0.55f));
+            RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+            RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.85f, 0.20f, 0.54f));
             continue;
         }
 
         // revealed by Emhyr: show the card like the ones on the board
+        RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
 
         if (card->IsTemporary())
-            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0, 0, 0));
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         else
-            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
 
         if (card->GetFlipProgress() < 1) continue; // the squares don't shrink, so hide them while flipping
 
@@ -637,7 +692,7 @@ void Tema1::Update(float deltaTimeSeconds)
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(positionCurrentCard.x + (-Card::WIDTH / 2 + 6 + j * 8) * HAND_SCALE, positionCurrentCard.y + (-Card::HEIGHT / 2 + 6) * HAND_SCALE);
             modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
-            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         }
     }
 
@@ -659,41 +714,43 @@ void Tema1::Update(float deltaTimeSeconds)
     // draw the HP for both players
     for (int i = 0; i < player->GetHp(); i++) {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(30 + (i % 5) * 14, 60 + (i / 5) * 14);
+        modelMatrix *= transform2D::Translate(30 + (i % 5) * 14, 39 + (i / 5) * 14);
         RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.18f, 0.54f, 0.34f));
     }
 
     for (int i = 0; i < opponent->GetHp(); i++) {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(30 + (i % 5) * 14, LOGIC_H - 60 - (i / 5) * 14);
+        modelMatrix *= transform2D::Translate(30 + (i % 5) * 14, LOGIC_H - 39 - (i / 5) * 14);
         RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.18f, 0.54f, 0.34f));
     }
 
     // draw shield points for both players
-    for (int i = 0; i < player->GetShield(); i++) {
+    if (player->GetShield() > 0) {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(30 + (i % 5) * 14, 60 + 5 * 14 + (i / 5) * 14);
+        modelMatrix *= transform2D::Translate(30, 39 + 5 * 14);
         RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.0f, 0.80f, 0.82f));
+        textRenderer->RenderText("x" + std::to_string(player->GetShield()), 42, LOGIC_H - (39 + 5 * 14) - 8, 0.35f, glm::vec3(0.25f, 0.12f, 0.25f));
     }
 
-    for (int i = 0; i < opponent->GetShield(); i++) {
+    if (opponent->GetShield() > 0) {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(30 + (i % 5) * 14, LOGIC_H - 60 - 5 * 14 - (i / 5) * 14);
+        modelMatrix *= transform2D::Translate(30, LOGIC_H - 39 - 5 * 14);
         RenderMesh2D(meshes["player_hp"], modelMatrix, glm::vec3(0.0f, 0.80f, 0.82f));
+        textRenderer->RenderText("x" + std::to_string(opponent->GetShield()), 42, 39 + 5 * 14 - 8, 0.35f, glm::vec3(0.25f, 0.12f, 0.25f));
     }
 
     for (int i = 0; i < player->GetCrystals(); i++) {
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(50 + i * 20, 270 - 50 - 20);
         modelMatrix *= transform2D::Rotate(glm::radians(45.0f)); // 45 degrees to look like diamonds
-        RenderMesh2D(meshes["crystal"], modelMatrix, glm::vec3(0.6f, 0.9f, 1.0f));
+        RenderMesh2D(meshes["crystal"], modelMatrix, glm::vec3(0.40f, 0.62f, 0.90f));
     }
 
     for (int i = 0; i < opponent->GetCrystals(); i++) {
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(50 + i * 20, 450 + 50 + 20);
         modelMatrix *= transform2D::Rotate(glm::radians(45.0f));
-        RenderMesh2D(meshes["crystal"], modelMatrix, glm::vec3(0.6f, 0.9f, 1.0f));
+        RenderMesh2D(meshes["crystal"], modelMatrix, glm::vec3(0.40f, 0.62f, 0.90f));
     }
 
     // opponent cards that are on the board
@@ -722,17 +779,19 @@ void Tema1::Update(float deltaTimeSeconds)
 
         //if (!card->IsFaceUp()) { // face down: only the back of the card
         if (!showFace) {
-            RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.55f, 0.0f, 0.55f));
+            RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
+            RenderMesh2D(meshes["card"], modelMatrix, glm::vec3(0.85f, 0.20f, 0.54f));
             continue;
         }
 
+        RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
 
         // render the symbol: triangle for temporary card and square for permanent
         if (card->IsTemporary())
-            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0, 0, 0));
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         else
-            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
 
         if (card == flippingCard) {
             continue; // the squares don't shrink with the card, so they should stay hided durring the flip
@@ -742,7 +801,7 @@ void Tema1::Update(float deltaTimeSeconds)
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 6 + i * 8, positionCurrentCard.y - Card::HEIGHT / 2 + 6); // 4 pixels to the right of the previous square
             
-            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         }
     }
 
@@ -753,19 +812,20 @@ void Tema1::Update(float deltaTimeSeconds)
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
         modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
+        RenderMesh2D(meshes["card_border"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         RenderMesh2D(meshes["card"], modelMatrix, selectedCard->GetColor());
 
         // render the symbol: triangle for temporary card and square for permanent
         if (selectedCard->IsTemporary())
-            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0, 0, 0));
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         else
-            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
 
         for (int i = 0; i < selectedCard->GetValue(); i++) {
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(positionCurrentCard.x + (-Card::WIDTH / 2 + 6 + i * 8) * HAND_SCALE, positionCurrentCard.y + (-Card::HEIGHT / 2 + 6) * HAND_SCALE); // 4 pixels to the right of the previous square
             modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
-            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(0.25f, 0.12f, 0.25f));
         }
     }
 
@@ -902,7 +962,7 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
             float leaderX = LOGIC_W / 2 + (i - 1.5f) * 220;
 
             // check if the player clicked inside the leader
-            if (glm::distance(glm::vec2(x, y), glm::vec2(leaderX, LOGIC_H / 2)) <= 50) {
+            if (abs(x - leaderX) <= Card::WIDTH * 3 / 2 && abs(y - LOGIC_H / 2) <= Card::HEIGHT * 3 / 2) {
                 if (i == selectedLeader) { // second click on the same leader: start the game
                     playerLeader = leaders[i];
 
@@ -1005,7 +1065,7 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
         }
     }
 
-    bool onBoard = x >= LOGIC_W / 2 - 70 - 450 && x <= LOGIC_W / 2 - 70 + 450;
+    bool onBoard = x >= LOGIC_W / 2 - 30 - 450 && x <= LOGIC_W / 2 - 30 + 450;
 
     if (onBoard && foundLane && selectedCard != nullptr && selectedCard->CanBeOnLane(droppedLane)) {
         {

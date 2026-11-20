@@ -4,7 +4,7 @@
 MedicCard::MedicCard(int value, Lane lane) : TemporaryCard(value, lane) {}
 
 glm::vec3 MedicCard::GetColor() const {
-	return glm::vec3(1.0f, 0.5f, 0.8f);
+	return glm::vec3(0.84f, 0.50f, 0.70f);
 }
 
 CardType MedicCard::GetType() const {

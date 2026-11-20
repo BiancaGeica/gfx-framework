@@ -3,7 +3,7 @@
 ScorchCard::ScorchCard(int value, Lane lane) : TemporaryCard(value, lane) {}
 
 glm::vec3 ScorchCard::GetColor() const {
-	return glm::vec3(1, 0, 1); // purple
+	return glm::vec3(0.62f, 0.40f, 0.75f); // purple
 }
 
 CardType ScorchCard::GetType() const {

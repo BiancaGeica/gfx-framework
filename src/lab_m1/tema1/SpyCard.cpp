@@ -5,7 +5,7 @@ SpyCard::SpyCard(int value, Lane lane) : TemporaryCard(value, lane) {}
 
 glm::vec3 SpyCard::GetColor() const {
 	// return glm::vec3(0, 0, 0); // black
-	return glm::vec3(0.25f, 0.25f, 0.25f); // bc the background is black i can't see the card
+	return glm::vec3(0.42f, 0.38f, 0.45f); // bc the background is black i can't see the card
 }
 
 CardType SpyCard::GetType() const {

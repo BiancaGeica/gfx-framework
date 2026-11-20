@@ -3,7 +3,7 @@
 FrostCard::FrostCard(int value) : TemporaryCard(value, Lane::Melee){}
 
 glm::vec3 FrostCard::GetColor() const {
-	return glm::vec3(1, 1, 1);
+	return glm::vec3(0.98f, 0.96f, 0.90f);
 }
 
 CardType FrostCard::GetType() const {

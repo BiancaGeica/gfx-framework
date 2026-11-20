@@ -25,3 +25,7 @@ void FoltestLeader::UseAbility(Player& owner, Player& opponent) {
 		}
 	}
 }
+
+std::string FoltestLeader::GetName() const {
+	return "FOLTEST";
+}

@@ -27,3 +27,7 @@ void EmhyrLeader::UseAbility(Player& owner, Player& opponent) {
 		}
 	}
 }
+
+std::string EmhyrLeader::GetName() const {
+	return "EMHYR";
+}

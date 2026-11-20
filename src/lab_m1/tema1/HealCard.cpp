@@ -3,7 +3,7 @@
 HealCard::HealCard(int value, Lane lane) : PermanentCard(value, lane){}
 
 glm::vec3 HealCard::GetColor() const {
-	return glm::vec3(0, 1, 0);
+	return glm::vec3(0.72f, 0.85f, 0.42f);
 }
 
 CardType HealCard::GetType() const {

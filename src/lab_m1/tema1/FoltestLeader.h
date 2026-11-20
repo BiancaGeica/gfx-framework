@@ -6,6 +6,7 @@ class FoltestLeader : public Leader
 {
 public:
 	std::string GetMeshName() const override;
+	std::string GetName() const override;
 	glm::vec3 GetColor() const override;
 
 protected:
