@@ -496,7 +496,7 @@ void Tema1::Update(float deltaTimeSeconds)
 
         // players lanes
         glm::vec3 laneColor = playerBoardColor;
-        if (selectedCard != nullptr && selectedCard->CanBeOnLane(lane)) {
+        if (selectedCard != nullptr && selectedCard->GetType() != CardType::Decoy && selectedCard->CanBeOnLane(lane)) {
             laneColor = glm::vec3(0.2f, 0.45f, 0.3f); // highlight
         }
 
@@ -548,6 +548,9 @@ void Tema1::Update(float deltaTimeSeconds)
 
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
+        if (selectedCard != nullptr && selectedCard->GetType() == CardType::Decoy) {
+            RenderMesh2D(meshes["card"], modelMatrix * transform2D::Scale(1.15f, 1.15f), glm::vec3(0.2f, 0.4f, 1.0f));
+        }
         RenderMesh2D(meshes["card"], modelMatrix, card->GetColor());
 
         // render the symbol: triangle for temporary card and square for permanent
@@ -653,29 +656,6 @@ void Tema1::Update(float deltaTimeSeconds)
         UpdateRow(opponent->GetHand(), LOGIC_H - 60, HAND_SCALE);
     }
 
-    // draw the selected card because it went under other things when being hoovered over the screen and that's not cute
-    if (selectedCard != nullptr) {
-        glm::vec2 positionCurrentCard = selectedCard->GetPos();
-
-        modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
-        modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
-        RenderMesh2D(meshes["card"], modelMatrix, selectedCard->GetColor());
-
-        // render the symbol: triangle for temporary card and square for permanent
-        if (selectedCard->IsTemporary())
-            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0, 0, 0));
-        else
-            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
-
-        for (int i = 0; i < selectedCard->GetValue(); i++) {
-            modelMatrix = glm::mat3(1);
-            modelMatrix *= transform2D::Translate(positionCurrentCard.x + (-Card::WIDTH / 2 + 6 + i * 8) * HAND_SCALE, positionCurrentCard.y + (-Card::HEIGHT / 2 + 6) * HAND_SCALE); // 4 pixels to the right of the previous square
-            modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
-            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
-        }
-    }
-
     // draw the HP for both players
     for (int i = 0; i < player->GetHp(); i++) {
         modelMatrix = glm::mat3(1);
@@ -704,14 +684,14 @@ void Tema1::Update(float deltaTimeSeconds)
 
     for (int i = 0; i < player->GetCrystals(); i++) {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(30 + i * 20, 30);
+        modelMatrix *= transform2D::Translate(50 + i * 20, 270 - 50 - 20);
         modelMatrix *= transform2D::Rotate(glm::radians(45.0f)); // 45 degrees to look like diamonds
         RenderMesh2D(meshes["crystal"], modelMatrix, glm::vec3(0.6f, 0.9f, 1.0f));
     }
 
     for (int i = 0; i < opponent->GetCrystals(); i++) {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(30 + i * 20, LOGIC_H - 30);
+        modelMatrix *= transform2D::Translate(50 + i * 20, 450 + 50 + 20);
         modelMatrix *= transform2D::Rotate(glm::radians(45.0f));
         RenderMesh2D(meshes["crystal"], modelMatrix, glm::vec3(0.6f, 0.9f, 1.0f));
     }
@@ -762,6 +742,29 @@ void Tema1::Update(float deltaTimeSeconds)
             modelMatrix = glm::mat3(1);
             modelMatrix *= transform2D::Translate(positionCurrentCard.x - Card::WIDTH / 2 + 6 + i * 8, positionCurrentCard.y - Card::HEIGHT / 2 + 6); // 4 pixels to the right of the previous square
             
+            RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
+        }
+    }
+
+    // draw the selected card because it went under other things when being hoovered over the screen and that's not cute
+    if (selectedCard != nullptr) {
+        glm::vec2 positionCurrentCard = selectedCard->GetPos();
+
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(positionCurrentCard.x, positionCurrentCard.y);
+        modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
+        RenderMesh2D(meshes["card"], modelMatrix, selectedCard->GetColor());
+
+        // render the symbol: triangle for temporary card and square for permanent
+        if (selectedCard->IsTemporary())
+            RenderMesh2D(meshes["symbol_triangle"], modelMatrix, glm::vec3(0, 0, 0));
+        else
+            RenderMesh2D(meshes["symbol_square"], modelMatrix, glm::vec3(0, 0, 0));
+
+        for (int i = 0; i < selectedCard->GetValue(); i++) {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(positionCurrentCard.x + (-Card::WIDTH / 2 + 6 + i * 8) * HAND_SCALE, positionCurrentCard.y + (-Card::HEIGHT / 2 + 6) * HAND_SCALE); // 4 pixels to the right of the previous square
+            modelMatrix *= transform2D::Scale(HAND_SCALE, HAND_SCALE);
             RenderMesh2D(meshes["card_hp"], modelMatrix, glm::vec3(1, 1, 1));
         }
     }
