@@ -78,3 +78,7 @@ void Player::SetLastCardPlayed(Card* card) {
 void Player::SetDoubleNextCard(bool something) {
 	doubleNextCard = something;
 }
+
+std::vector<Card*>& Player::GetUsedCards() {
+	return usedCards;
+}

@@ -25,6 +25,7 @@ public:
 	Card* GetLastCardPlayed() const;
 
 	std::vector<Card*>& GetHand();
+	std::vector<Card*>& GetUsedCards();
 
 	int GetCrystals() const;
 
@@ -45,6 +46,9 @@ protected:
 
 	// for spy
 	std::vector<Card*> hand; // players hand to know where to go
+
+	// for medic
+	std::vector<Card*> usedCards;
 
 	// for rounds
 	int crystals = 2;

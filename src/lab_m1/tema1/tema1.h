@@ -17,6 +17,8 @@
 #include "lab_m1/tema1/SpyCard.h"
 #include "lab_m1/tema1/FogCard.h"
 #include "lab_m1/tema1/RainCard.h"
+#include "lab_m1/tema1/MedicCard.h"
+#include "lab_m1/tema1/DecoyCard.h"
 #include "lab_m1/tema1/FoltestLeader.h"
 #include "lab_m1/tema1/EmhyrLeader.h"
 #include "lab_m1/tema1/EredinLeader.h"
@@ -94,6 +96,7 @@ namespace m1
         float TextWidth(std::string text, float scale);
         float LaneY(Lane lane, bool isPlayer);
         void LayoutBoard(Player* p, bool isPlayer);
+        void UseDecoy(Player* p, Card* decoy, int target);
 
         // leaders
         std::vector<Leader*> leaders;

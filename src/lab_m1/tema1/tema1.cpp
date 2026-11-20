@@ -30,7 +30,7 @@ Card* Tema1::AddRandomCard() {
     int value = 1 + rand() % 3; // cards hp
     Lane lane = (Lane)(rand() % 3);// On witch lane is the temporary card: Melee, Ranged, Siege
 
-    switch (rand() % 13) {
+    switch (rand() % 15) {
     case 0: case 1: case 2:
         return new DamageCard(value, lane);
     case 3: case 4:
@@ -43,6 +43,8 @@ Card* Tema1::AddRandomCard() {
     case 9:  return new ScorchCard(value, lane);
     case 10: return new SpyCard(1, lane);
     case 11: return new WarHornCard(1, lane);
+    case 12: return new MedicCard(1, lane);
+    case 13: return new DecoyCard(1, lane);
     default: return new ClearWeatherCard(1, lane);
     }
 }
@@ -89,14 +91,14 @@ void Tema1::ApplyEffects() {
 
     for (int i = player->GetBoard().size() - 1; i >= 0; i--) {
         if (player->GetBoard()[i]->IsDestroyed()) {
-            delete player->GetBoard()[i]; // delete is the reverse of new, is used to free memory
+            player->GetUsedCards().push_back(player->GetBoard()[i]);
             player->GetBoard().erase(player->GetBoard().begin() + i);
         }
     }
 
     for (int i = opponent->GetBoard().size() - 1; i >= 0; i--) {
         if (opponent->GetBoard()[i]->IsDestroyed()) {
-            delete opponent->GetBoard()[i];
+            opponent->GetUsedCards().push_back(opponent->GetBoard()[i]);
             opponent->GetBoard().erase(opponent->GetBoard().begin() + i);
         }
     }
@@ -131,12 +133,12 @@ void Tema1::ApplyEffects() {
 void Tema1::GoToNextRound() {
     // clean the board at the end
     for (int i = 0; i < player->GetBoard().size(); i++) {
-        delete player->GetBoard()[i];
+        player->GetUsedCards().push_back(player->GetBoard()[i]);
     }
     player->GetBoard().clear();
 
     for (int i = 0; i < opponent->GetBoard().size(); i++) {
-        delete opponent->GetBoard()[i];
+        opponent->GetUsedCards().push_back(opponent->GetBoard()[i]);
     }
     opponent->GetBoard().clear();
 
@@ -181,6 +183,15 @@ void Tema1::LayoutBoard(Player* p, bool isPlayer) {
     }
 }
 
+void Tema1::UseDecoy(Player* p, Card* decoy, int target) {
+    Card* returned = p->GetBoard()[target];
+    decoy->SetLane(returned->GetLane());
+    p->GetBoard()[target] = decoy;
+    returned->ResetValue();
+    returned->SetFaceUp(false);
+    p->GetHand().push_back(returned);
+}
+
 void Tema1::StartGame() {
     // throw away everything from the previous game
     if (player != nullptr) {
@@ -190,6 +201,9 @@ void Tema1::StartGame() {
         for (int i = 0; i < player->GetBoard().size(); i++) {
             delete player->GetBoard()[i];
         }
+        for (int i = 0; i < player->GetUsedCards().size(); i++) {
+            delete player->GetUsedCards()[i];
+        }
         delete player;
     }
     if (opponent != nullptr) {
@@ -198,6 +212,9 @@ void Tema1::StartGame() {
         }
         for (int i = 0; i < opponent->GetBoard().size(); i++) {
             delete opponent->GetBoard()[i];
+        }
+        for (int i = 0; i < opponent->GetUsedCards().size(); i++) {
+            delete opponent->GetUsedCards()[i];
         }
         delete opponent;
     }
@@ -774,7 +791,12 @@ void Tema1::Update(float deltaTimeSeconds)
 
             if (!opponent->GetHand().empty()) { // could be 0, then rand would go kapoot
                 int random = rand() % opponent->GetHand().size();
-                opponent->GetBoard().push_back(opponent->GetHand()[random]);
+                if (opponent->GetHand()[random]->GetType() == CardType::Decoy && !opponent->GetBoard().empty()) {
+                    UseDecoy(opponent, opponent->GetHand()[random], rand() % opponent->GetBoard().size());
+                }
+                else {
+                    opponent->GetBoard().push_back(opponent->GetHand()[random]);
+                }
                 opponent->SetLastCardPlayed(opponent->GetHand()[random]); // for Scorch, it saves the last played card
 
                 if (opponent->GetDoubleNextCard()) {
@@ -947,6 +969,28 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
     glm::ivec2 resolution = window->GetResolution();
     float x = mouseX * LOGIC_W / resolution.x;
     float y = (resolution.y - mouseY) * LOGIC_H / resolution.y;
+
+    if (selectedCard != nullptr && selectedCard->GetType() == CardType::Decoy) {
+        for (int t = 0; t < player->GetBoard().size(); t++) {
+            if (player->GetBoard()[t]->IsMouseOver(x, y)) {
+                for (int i = 0; i < player->GetHand().size(); i++) {
+                    if (player->GetHand()[i] == selectedCard) {
+                        player->GetHand().erase(player->GetHand().begin() + i);
+                        break;
+                    }
+                }
+                UseDecoy(player, selectedCard, t);
+                player->SetLastCardPlayed(selectedCard);
+                UpdateRow(player->GetHand(), 60, HAND_SCALE);
+                LayoutBoard(player, true);
+                opponentTurn = true;
+                opponentDelay = 0;
+                break;
+            }
+        }
+        selectedCard = nullptr;
+        return;
+    }
 
     // move the card from the players inventory to the board
     bool foundLane = false;
